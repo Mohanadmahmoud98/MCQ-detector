@@ -1,0 +1,4242 @@
+import cv2
+import numpy as np
+import math
+
+img = cv2.imread('test_sample11.jpg', 1)
+print(img)
+dimensions = img.shape
+height = img.shape[0]
+width = img.shape[1]
+print(height)
+print(width)
+#if width > height:
+    #img = np.rot90(img)
+img = cv2.resize(img, (0, 0), fx=0.8, fy=0.8)
+img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+img_edges = cv2.Canny(img, 100, 100, apertureSize=3)
+lines = cv2.HoughLinesP(img_edges, 1, math.pi / 180.0, 100, minLineLength=100, maxLineGap=5)
+angles = []
+for x1, y1, x2, y2 in lines[0]:
+    cv2.line(img, (x1, y1), (x2, y2), (255, 0, 0), 3)
+    angle = math.degrees(math.atan2(y2 - y1, x2 - x1))
+    angles.append(angle)
+
+median_angle = np.median(angles)
+if -130< median_angle < -70 :
+    img=np.rot90(img)
+    median_angle = median_angle + 90
+CounterGender = 0
+CounterTerm = 0
+CounterThreeThree = 0
+CounterTwoFive = 0
+CounterTwoSix = 0
+CounterThreeTwo = 0
+CounterMajor = 0
+CounterThreeOne = 0
+CounterOneTwo = 0
+CounterTwoFour = 0
+CounterOneThree = 0
+CounterOneFour = 0
+CounterTwoThree = 0
+CounterOneFive = 0
+CounterTwoTwo = 0
+CounterTwoOne = 0
+CounterOneOne = 0
+CounterFourOne= 0
+CounterFourTwo= 0
+CounterFourThree = 0
+CounterFiveOne = 0
+CounterFiveTwo = 0
+# ---------------Angle less than 0------------------------------
+if median_angle < 0:
+    image_center = tuple(np.array(img.shape[1::-1]) / 2)
+    rot_mat = cv2.getRotationMatrix2D(image_center, median_angle, 1.0)
+    result = cv2.warpAffine(img, rot_mat, img.shape[1::-1], flags=cv2.INTER_LINEAR,borderValue=255)
+    result = cv2.resize(result, (0, 0), fx=0.4, fy=0.4)
+    #    result = cv2.cvtColor(result, cv2.COLOR_BGR2GRAY)
+    ret, result = cv2.threshold(result, 25, 255, cv2.THRESH_BINARY_INV)
+    cv2.imshow("abc", result)
+    output = cv2.connectedComponentsWithStats(result, connectivity=4)  # apply connected components
+    num_labels = output[0]  # gets the number of connected components
+    centroids = output[3]  # gets the center of each object (connected component)
+    print(centroids[6][0])
+    print(num_labels)
+    lists = ["Gender Not Answerd", "Term Not Answered", "Major Not Answred", "1.1 Not Answered", "1.2 Not Answered",
+             "1.3 Not Answered", "1.4 Not Answered", "1.5 Not Answered", "2.1 Not Answered", "2.2 Not Answered",
+             "2.3 Not Answered", "2.4 Not Answered", "2.5 Not Answered", "2.6 Not Answered", "3.1 Not Answered",
+             "3.2 Not Answered", "3.3 Not Answered", "4.1 Not Answered", "4.2 Not Answered", "4.3 Not Answered",
+             "5.1 Not Answered", "5.1 Not Answered"]
+    i = 0
+    dimensions = result.shape
+
+    # height, width, number of channels in image
+    height = result.shape[0]
+    width = result.shape[1]
+
+    print(width)
+    print(height)
+    for labels in range(0, num_labels):
+        if 90 < centroids[labels][1] < 103:
+            if 395 < centroids[labels][0] < 408:
+                if CounterGender == 0:
+                    lists[i] = "Gender: Male"
+                    CounterGender = CounterGender + 1
+                    i = i + 1
+                elif CounterGender > 0:
+                    lists[i - 1] = "Incorrect Answer"
+            if 435 < centroids[labels][0] < 450:
+                if CounterGender == 0:
+                    lists[i] = "Gender: Female"
+                    CounterGender = CounterGender + 1
+                    i = i + 1
+                elif CounterGender > 0:
+                    lists[i - 1] = "Incorrect Answer"
+
+        if 117 < centroids[labels][1] < 128:
+            if CounterGender == 0:
+                i = i + 1
+            if 170 < centroids[labels][0] < 188:
+                if CounterTerm == 0:
+                    lists[i] = "Semester: Fall"
+                    CounterTerm = CounterTerm + 1
+                    i = i + 1
+            if 255 < centroids[labels][0] < 275:
+                if CounterTerm == 0:
+                    lists[i] = "Semester: Spring"
+                    CounterTerm = CounterTerm + 1
+                    i = i + 1
+                elif CounterTerm > 0:
+                    lists[i - 1] = "Incorrect Answer"
+            if 340 < centroids[labels][0] < 355:
+                if CounterTerm == 0:
+                    lists[i] = "Semester: Summer"
+                    CounterTerm = CounterTerm + 1
+                    i = i + 1
+                elif CounterTerm > 0:
+                    lists[i - 1] = "Incorrect Answer"
+        # -----------------------------------------------------------------------
+        if 140 < centroids[labels][1] < 155:
+            if CounterGender == 0:
+                i = i + 1
+            if CounterTerm == 0:
+                i = i + 1
+            if 139 < centroids[labels][0] < 148:
+                if CounterMajor == 0:
+                    lists[i] = "Major: MCTA"
+                    i = i + 1
+                    CounterMajor = CounterMajor + 1
+                elif CounterMajor > 0:
+                    lists[i - 1] = "Incorrect Answer"
+            if 178 < centroids[labels][0] < 200:
+                if CounterMajor == 0:
+                    lists[i] = "Major: EVER"
+                    i = i + 1
+                    CounterMajor = CounterMajor + 1
+                elif CounterMajor > 0:
+                    lists[i - 1] = "Incorrect Answer"
+            if 220 < centroids[labels][0] < 240:
+                if CounterMajor == 0:
+                    lists[i] = "Major: BLDG"
+                    i = i + 1
+                    CounterMajor = CounterMajor + 1
+                elif CounterMajor > 0:
+                    lists[i - 1] = "Incorrect Answer"
+            if 260 < centroids[labels][0] < 290:
+                if CounterMajor == 0:
+                    lists[i] = "Major: CESS"
+                    i = i + 1
+                    CounterMajor = CounterMajor + 1
+                elif CounterMajor > 0:
+                    lists[i - 1] = "Incorrect Answer"
+            if 308 < centroids[labels][0] < 330:
+                if CounterMajor == 0:
+                    lists[i] = "Major: ERGY"
+                    i = i + 1
+                    CounterMajor = CounterMajor + 1
+                elif CounterMajor > 0:
+                    lists[i - 1] = "Incorrect Answer"
+            if 350 < centroids[labels][0] < 370:
+                if CounterMajor == 0:
+                    lists[i] = "Major: COMM"
+                    i = i + 1
+                    CounterMajor = CounterMajor + 1
+                elif CounterMajor > 0:
+                    lists[i - 1] = "Incorrect Answer"
+            if 395 < centroids[labels][0] < 415:
+                if CounterMajor == 0:
+                    lists[i] = "Major: Manf"
+                    i = i + 1
+                    CounterMajor = CounterMajor + 1
+                elif CounterMajor > 0:
+                    lists[i - 1] = "Incorrect Answer"
+        if 151 < centroids[labels][1] < 170:
+            if 138 < centroids[labels][0] < 155:
+                if CounterMajor == 0:
+                    lists[i] = "Major: LARR"
+                    i = i + 1
+                    CounterMajor = CounterMajor + 1
+                elif CounterMajor > 0:
+                    lists[i - 1] = "Incorrect Answer"
+            if 180 < centroids[labels][0] < 200:
+                if CounterMajor == 0:
+                    lists[i] = "Major: MATL"
+                    i = i + 1
+                    CounterMajor = CounterMajor + 1
+                elif CounterMajor > 0:
+                    lists[i - 1] = "Incorrect Answer"
+            if 222 < centroids[labels][0] < 240:
+                if CounterMajor == 0:
+                    lists[i] = "Major: CISE"
+                    i = i + 1
+                    CounterMajor = CounterMajor + 1
+                elif CounterMajor > 0:
+                    lists[i - 1] = "Incorrect Answer"
+            if 265 < centroids[labels][0] < 290:
+                if CounterMajor == 0:
+                    lists[i] = "Major: HAUD"
+                    i = i + 1
+                    CounterMajor = CounterMajor + 1
+                elif CounterMajor > 0:
+                    lists[i - 1] = "Incorrect Answer"
+        # ------------------------------------------------------------
+        if 307 < centroids[labels][1] < 318:
+            if CounterGender == 0:
+                i = i + 1
+            if CounterTerm == 0:
+                i = i + 1
+            if CounterMajor == 0:
+                i = i + 1
+            if 354 < centroids[labels][0] < 370:
+                if CounterOneOne == 0:
+                    lists[i] = "1.1:Strongly Agree"
+                    i = i + 1
+                    CounterOneOne = CounterOneOne + 1
+                elif CounterOneOne > 0:
+                    lists[i - 1] = "Incorrect Answer"
+            if 383 < centroids[labels][0] < 400:
+                if CounterOneOne == 0:
+                    lists[i] = "1.1:Agree"
+                    i = i + 1
+                    CounterOneOne = CounterOneOne + 1
+                elif CounterOneOne > 0:
+                    lists[i - 1] = "Incorrect Answer"
+            if 415 < centroids[labels][0] < 435:
+                if CounterOneOne == 0:
+                    lists[i] = "1.1:Natural"
+                    i = i + 1
+                    CounterOneOne = CounterOneOne + 1
+                elif CounterOneOne > 0:
+                    lists[i - 1] = "Incorrect Answer"
+            if 447 < centroids[labels][0] < 465:
+                if CounterOneOne == 0:
+                    lists[i] = "1.1:Disagree"
+                    i = i + 1
+                    CounterOneOne = CounterOneOne + 1
+                elif CounterOneOne > 0:
+                    lists[i - 1] = "Incorrect Answer"
+            if 477 < centroids[labels][0] < 495:
+                if CounterOneOne == 0:
+                    lists[i] = "1.1:Strongly Disagree"
+                    i = i + 1
+                    CounterOneOne = CounterOneOne + 1
+                elif CounterOneOne > 0:
+                    lists[i - 1] = "Incorrect Answer"
+        # --------------------------------------------------------
+        if 319 < centroids[labels][1] < 332:
+            if CounterGender == 0:
+                i = i + 1
+            if CounterTerm == 0:
+                i = i + 1
+            if CounterMajor == 0:
+                i = i + 1
+            if CounterOneOne == 0:
+                i = i + 1
+            if 354 < centroids[labels][0] < 370:
+                if CounterOneTwo == 0:
+                    lists[i] = "1.2: Strongly Agree"
+                    CounterOneTwo = CounterOneTwo + 1
+                    i = i + 1
+            if 383 < centroids[labels][0] < 400:
+                if CounterOneTwo == 0:
+                    lists[i] = "1.2:Agree"
+                    i = i + 1
+                    CounterOneTwo = CounterOneTwo + 1
+                elif CounterOneTwo > 0:
+                    lists[i - 1] = "Incorrect Answer"
+            if 415 < centroids[labels][0] < 435:
+                if CounterOneTwo == 0:
+                    lists[i] = "1.2:Natural"
+                    i = i + 1
+                    CounterOneTwo = CounterOneTwo + 1
+                elif CounterOneTwo > 0:
+                    lists[i - 1] = "Incorrect Answer"
+            if 447 < centroids[labels][0] < 465:
+                if CounterOneTwo == 0:
+                    lists[i] = "1..2:Disagree"
+                    i = i + 1
+                    CounterOneTwo = CounterOneTwo + 1
+                elif CounterOneTwo > 0:
+                    lists[i - 1] = "Incorrect Answer"
+            if 477 < centroids[labels][0] < 495:
+                if CounterOneTwo == 0:
+                    lists[i] = "1.2:Strongly Disagree"
+                    i = i + 1
+                    CounterOneTwo = CounterOneTwo + 1
+                elif CounterOneTwo > 0:
+                    lists[i - 1] = "Incorrect Answer"
+        # --------------------------------------------------------------------------
+        if 330 < centroids[labels][1] < 345:
+            if CounterGender == 0:
+                i = i + 1
+            if CounterTerm == 0:
+                i = i + 1
+            if CounterMajor == 0:
+                i = i + 1
+            if CounterOneOne == 0:
+                i = i + 1
+            if CounterOneTwo == 0:
+                i = i + 1
+            if 354 < centroids[labels][0] < 370:
+                if CounterOneThree == 0:
+                    lists[i] = "1.3: Strongly Agree"
+                    CounterOneTwo = CounterOneTwo + 1
+                    i = i + 1
+            if 383 < centroids[labels][0] < 400:
+                if CounterOneThree == 0:
+                    lists[i] = "1.3: Agree"
+                    i = i + 1
+                    CounterOneThree = CounterOneThree + 1
+                elif CounterOneThree > 0:
+                    lists[i - 1] = "Incorrect Answer"
+            if 415 < centroids[labels][0] < 435:
+                if CounterOneThree == 0:
+                    lists[i] = "1.3: Natural"
+                    i = i + 1
+                    CounterOneThree = CounterOneThree + 1
+                elif CounterOneThree > 0:
+                    lists[i - 1] = "Incorrect Answer"
+            if 447 < centroids[labels][0] < 465:
+                if CounterOneThree == 0:
+                    lists[i] = "1.3: DisAgree"
+                    i = i + 1
+                    CounterOneThree = CounterOneThree + 1
+                elif CounterOneThree > 0:
+                    lists[i - 1] = "Incorrect Answer"
+            if 477 < centroids[labels][0] < 495:
+                if CounterOneThree == 0:
+                    lists[i] = "1.3:Strongly DisAgree"
+                    i = i + 1
+                    CounterOneThree = CounterOneThree + 1
+                elif CounterOneThree > 0:
+                    lists[i - 1] = "Incorrect Answer"
+        # -------------------------------------------------------------------
+        if 348 < centroids[labels][1] < 355:
+            if CounterGender == 0:
+                i = i + 1
+            if CounterTerm == 0:
+                i = i + 1
+            if CounterMajor == 0:
+                i = i + 1
+            if CounterOneOne == 0:
+                i = i + 1
+            if CounterOneTwo == 0:
+                i = i + 1
+            if CounterOneThree == 0:
+                i = i + 1
+            if 354 < centroids[labels][0] < 370:
+                if CounterOneFour == 0:
+                    lists[i] = "1.4: Strongly Agree"
+                    i = i + 1
+                    CounterOneFour = CounterOneFour + 1
+            if 383 < centroids[labels][0] < 400:
+                if CounterOneFour == 0:
+                    lists[i] = "1.4: Agree"
+                    i = i + 1
+                    CounterOneFour = CounterOneFour + 1
+                elif CounterOneFour > 0:
+                    lists[i - 1] = "Incorrect Answer"
+            if 415 < centroids[labels][0] < 435:
+                if CounterOneFour == 0:
+                    lists[i] = "1.4: Natural"
+                    i = i + 1
+                    CounterOneFour = CounterOneFour + 1
+                elif CounterOneFour > 0:
+                    lists[i - 1] = "Incorrect Answer"
+            if 447 < centroids[labels][0] < 465:
+                if CounterOneFour == 0:
+                    lists[i] = "1.4: DisAgree"
+                    i = i + 1
+                    CounterOneFour = CounterOneFour + 1
+                elif CounterOneFour > 0:
+                    lists[i - 1] = "Incorrect Answer"
+            if 477 < centroids[labels][0] < 495:
+                if CounterOneFour == 0:
+                    lists[i] = "1.4:Strongly DisAgree"
+                    i = i + 1
+                    CounterOneFour = CounterOneFour + 1
+                elif CounterOneFour > 0:
+                    lists[i - 1] = "Incorrect Answer"
+        # -----------------------------------------------------------------------
+        if 357 < centroids[labels][1] < 369:
+            if CounterGender == 0:
+                i = i + 1
+            if CounterTerm == 0:
+                i = i + 1
+            if CounterMajor == 0:
+                i = i + 1
+            if CounterOneOne == 0:
+                i = i + 1
+            if CounterOneTwo == 0:
+                i = i + 1
+            if CounterOneThree == 0:
+                i = i + 1
+            if CounterOneFour == 0:
+                i = i + 1
+            if 354 < centroids[labels][0] < 370:
+                if CounterOneFive == 0:
+                    lists[i] = "1.5:Strongly Agree"
+                    i = i + 1
+                    CounterOneFive = CounterOneFive + 1
+            if 383 < centroids[labels][0] < 400:
+                if CounterOneFive == 0:
+                    lists[i] = "1.5:Agree"
+                    i = i + 1
+                    CounterOneFive = CounterOneFive + 1
+                elif CounterOneFive > 0:
+                    lists[i - 1] = "Incorrect Answer"
+            if 415 < centroids[labels][0] < 435:
+                if CounterOneFive == 0:
+                    lists[i] = "1.5:Natural"
+                    i = i + 1
+                    CounterOneFive = CounterOneFive + 1
+                elif CounterOneFive > 0:
+                    lists[i - 1] = "Incorrect Answer"
+            if 447 < centroids[labels][0] < 465:
+                if CounterOneFive == 0:
+                    lists[i] = "1.5:DisAgree"
+                    i = i + 1
+                    CounterOneFive = CounterOneFive + 1
+                elif CounterOneFive > 0:
+                    lists[i - 1] = "Incorrect Answer"
+            if 477 < centroids[labels][0] < 495:
+                if CounterOneFive == 0:
+                    lists[i] = "1.5:Strongly DisAgree"
+                    i = i + 1
+                    CounterOneFive = CounterOneFive + 1
+                elif CounterOneFive > 0:
+                    lists[i - 1] = "Incorrect Answer"
+        # ------------------------------------------------------------------------
+        if 398 < centroids[labels][1] < 410:
+            if CounterGender == 0:
+                i = i + 1
+            if CounterTerm == 0:
+                i = i + 1
+            if CounterMajor == 0:
+                i = i + 1
+            if CounterOneOne == 0:
+                i = i + 1
+            if CounterOneTwo == 0:
+                i = i + 1
+            if CounterOneThree == 0:
+                i = i + 1
+            if CounterOneFour == 0:
+                i = i + 1
+            if CounterOneFive == 0:
+                i = i + 1
+            if 353 < centroids[labels][0] < 370:
+                if CounterTwoOne == 0:
+                    lists[i] = "2.1:Strongly Agree"
+                    i = i + 1
+                    CounterTwoOne = CounterTwoOne + 1
+            if 383 < centroids[labels][0] < 400:
+                if CounterTwoOne == 0:
+                    lists[i] = "2.1:Agree"
+                    i = i + 1
+                    CounterTwoOne = CounterTwoOne + 1
+                elif CounterTwoOne > 0:
+                    lists[i - 1] = "Incorrect Answer"
+            if 415 < centroids[labels][0] < 435:
+                if CounterTwoOne == 0:
+                    lists[i] = "2.1:Natural"
+                    i = i + 1
+                    CounterTwoOne = CounterTwoOne + 1
+                elif CounterTwoOne > 0:
+                    lists[i - 1] = "Incorrect Answer"
+            if 447 < centroids[labels][0] < 465:
+                if CounterTwoOne == 0:
+                    lists[i] = "2.1:DisAgree"
+                    i = i + 1
+                    CounterTwoOne = CounterTwoOne + 1
+                elif CounterTwoOne > 0:
+                    lists[i - 1] = "Incorrect Answer"
+            if 477 < centroids[labels][0] < 495:
+                if CounterTwoOne == 0:
+                    lists[i] = "2.1:Stongly DisAgree"
+                    i = i + 1
+                    CounterTwoOne = CounterTwoOne + 1
+                elif CounterTwoOne > 0:
+                    lists[i - 1] = "Incorrect Answer"
+        # ---------------------------------------------------------------------------
+        if 410 < centroids[labels][1] < 422:
+            if CounterGender == 0:
+                i = i + 1
+            if CounterTerm == 0:
+                i = i + 1
+            if CounterMajor == 0:
+                i = i + 1
+            if CounterOneOne == 0:
+                i = i + 1
+            if CounterOneTwo == 0:
+                i = i + 1
+            if CounterOneThree == 0:
+                i = i + 1
+            if CounterOneFour == 0:
+                i = i + 1
+            if CounterOneFive == 0:
+                i = i + 1
+            if CounterTwoOne == 0:
+                i = i + 1
+            if 353 < centroids[labels][0] < 370:
+                if CounterTwoTwo == 0:
+                    lists[i] = "2.2:Strongly Agree"
+                    i = i + 1
+                    CounterTwoTwo = CounterTwoTwo + 1
+            if 383 < centroids[labels][0] < 400:
+                if CounterTwoTwo == 0:
+                    lists[i] = "2.2:Agree"
+                    i = i + 1
+                    CounterTwoTwo = CounterTwoTwo + 1
+                elif CounterTwoTwo > 0:
+                    lists[i - 1] = "Incorrect Answer"
+            if 415 < centroids[labels][0] < 435:
+                if CounterTwoTwo == 0:
+                    lists[i] = "2.2:Natural"
+                    i = i + 1
+                    CounterTwoTwo = CounterTwoTwo + 1
+                elif CounterTwoTwo > 0:
+                    lists[i - 1] = "Incorrect Answer"
+            if 447 < centroids[labels][0] < 465:
+                if CounterTwoTwo == 0:
+                    lists[i] = "2.2:DisAgree"
+                    i = i + 1
+                    CounterTwoTwo = CounterTwoTwo + 1
+                elif CounterTwoTwo > 0:
+                    lists[i - 1] = "Incorrect Answer"
+            if 477 < centroids[labels][0] < 495:
+                if CounterTwoTwo == 0:
+                    lists[i] = "2.2:Strongly DisAgree"
+                    i = i + 1
+                    CounterTwoTwo = CounterTwoTwo + 1
+                elif CounterTwoTwo > 0:
+                    lists[i - 1] = "Incorrect Answer"
+        # -----------------------------------------------------------------------
+        if 426 < centroids[labels][1] < 433:
+            if CounterGender == 0:
+                i = i + 1
+            if CounterTerm == 0:
+                i = i + 1
+            if CounterMajor == 0:
+                i = i + 1
+            if CounterOneOne == 0:
+                i = i + 1
+            if CounterOneTwo == 0:
+                i = i + 1
+            if CounterOneThree == 0:
+                i = i + 1
+            if CounterOneFour == 0:
+                i = i + 1
+            if CounterOneFive == 0:
+                i = i + 1
+            if CounterTwoOne == 0:
+                i = i + 1
+            if CounterTwoTwo == 0:
+                i = i + 1
+            if 356 < centroids[labels][0] < 365:
+                if CounterTwoThree == 0:
+                    lists[i] = "2.3:Strongly Agree"
+                    i = i + 1
+                    CounterTwoThree = CounterTwoThree + 1
+            if 383 < centroids[labels][0] < 400:
+                if CounterTwoThree == 0:
+                    lists[i] = "2.3:Agree"
+                    i = i + 1
+                    CounterTwoThree = CounterTwoThree + 1
+                elif CounterTwoThree > 0:
+                    lists[i - 1] = "Incorrect Answer"
+            if 415 < centroids[labels][0] < 435:
+                if CounterTwoThree == 0:
+                    lists[i] = "2.3:Natural"
+                    i = i + 1
+                    CounterTwoThree = CounterTwoThree + 1
+                elif CounterTwoThree > 0:
+                    lists[i - 1] = "Incorrect Answer"
+            if 450 < centroids[labels][0] < 462:
+                if CounterTwoThree == 0:
+                    lists[i] = "2.3:DisAgree"
+                    i = i + 1
+                    CounterTwoThree = CounterTwoThree + 1
+                elif CounterTwoThree > 0:
+                    lists[i - 1] = "Incorrect Answer"
+            if 477 < centroids[labels][0] < 495:
+                if CounterTwoThree == 0:
+                    lists[i] = "2.3:Strongle DisAgree"
+                    i = i + 1
+                    CounterTwoThree = CounterTwoThree + 1
+                elif CounterTwoThree > 0:
+                    lists[i - 1] = "Incorrect Answer"
+        # -------------------------------------------------------------------------
+        if 437 < centroids[labels][1] < 446:
+            if CounterGender == 0:
+                i = i + 1
+            if CounterTerm == 0:
+                i = i + 1
+            if CounterMajor == 0:
+                i = i + 1
+            if CounterOneOne == 0:
+                i = i + 1
+            if CounterOneTwo == 0:
+                i = i + 1
+            if CounterOneThree == 0:
+                i = i + 1
+            if CounterOneFour == 0:
+                i = i + 1
+            if CounterOneFive == 0:
+                i = i + 1
+            if CounterTwoOne == 0:
+                i = i + 1
+            if CounterTwoTwo == 0:
+                i = i + 1
+            if CounterTwoThree == 0:
+                i = i + 1
+            if 353 < centroids[labels][0] < 370:
+                if CounterTwoFour == 0:
+                    lists[i] = "2.4:Strongly Agree"
+                    i = i + 1
+                    CounterTwoFour = CounterTwoFour + 1
+            if 383 < centroids[labels][0] < 400:
+                if CounterTwoFour == 0:
+                    lists[i] = "2.4:Agree"
+                    i = i + 1
+                    CounterTwoFour = CounterTwoFour + 1
+                elif CounterTwoFour > 0:
+                    lists[i - 1] = "Incorrect Answer"
+            if 415 < centroids[labels][0] < 435:
+                if CounterTwoFour == 0:
+                    lists[i] = "2.4:Natural"
+                    i = i + 1
+                    CounterTwoFour = CounterTwoFour + 1
+                elif CounterTwoFour > 0:
+                    lists[i - 1] = "Incorrect Answer"
+            if 447 < centroids[labels][0] < 465:
+                if CounterTwoFour == 0:
+                    lists[i] = "2.4:DisAgree"
+                    i = i + 1
+                    CounterTwoFour = CounterTwoFour + 1
+                elif CounterTwoFour > 0:
+                    lists[i - 1] = "Incorrect Answer"
+            if 477 < centroids[labels][0] < 495:
+                if CounterTwoFour == 0:
+                    lists[i] = "2.4:Strongly DisAgree"
+                    i = i + 1
+                    CounterTwoFour = CounterTwoFour + 1
+                elif CounterTwoFour > 0:
+                    lists[i - 1] = "Incorrect Answer"
+        # -------------------------------------------------------------------------
+        if 449 < centroids[labels][1] < 459:
+            if CounterGender == 0:
+                i = i + 1
+            if CounterTerm == 0:
+                i = i + 1
+            if CounterMajor == 0:
+                i = i + 1
+            if CounterOneOne == 0:
+                i = i + 1
+            if CounterOneTwo == 0:
+                i = i + 1
+            if CounterOneThree == 0:
+                i = i + 1
+            if CounterOneFour == 0:
+                i = i + 1
+            if CounterOneFive == 0:
+                i = i + 1
+            if CounterTwoOne == 0:
+                i = i + 1
+            if CounterTwoTwo == 0:
+                i = i + 1
+            if CounterTwoThree == 0:
+                i = i + 1
+            if CounterTwoFour == 0:
+                i = i + 1
+            if 353 < centroids[labels][0] < 370:
+                if CounterTwoFive == 0:
+                    lists[i] = "2.5:Strongly Agree"
+                    i = i + 1
+                    CounterTwoFive = CounterTwoFive + 1
+            if 383 < centroids[labels][0] < 400:
+                if CounterTwoFive == 0:
+                    lists[i] = "2.5:Agree"
+                    i = i + 1
+                    CounterTwoFive = CounterTwoFive + 1
+                elif CounterTwoFive > 0:
+                    lists[i - 1] = "Incorrect Answer"
+            if 415 < centroids[labels][0] < 435:
+                if CounterTwoFive == 0:
+                    lists[i] = "2.5:Natural"
+                    i = i + 1
+                    CounterTwoFive = CounterTwoFive + 1
+                elif CounterTwoFive > 0:
+                    lists[i - 1] = "Incorrect Answer"
+            if 447 < centroids[labels][0] < 465:
+                if CounterTwoFive == 0:
+                    lists[i] = "2.5:DisAgree"
+                    i = i + 1
+                    CounterTwoFive = CounterTwoFive + 1
+                elif CounterTwoFive > 0:
+                    lists[i - 1] = "Incorrect Answer"
+            if 477 < centroids[labels][0] < 495:
+                if CounterTwoFive == 0:
+                    lists[i] = "2.5:Strongly DisAgree"
+                    i = i + 1
+                    CounterTwoFive = CounterTwoFive + 1
+                elif CounterTwoFive > 0:
+                    lists[i - 1] = "Incorrect Answer"
+        # -------------------------------------------------------------------------
+        if 461 < centroids[labels][1] < 470:
+            if CounterGender == 0:
+                i = i + 1
+            if CounterTerm == 0:
+                i = i + 1
+            if CounterMajor == 0:
+                i = i + 1
+            if CounterOneOne == 0:
+                i = i + 1
+            if CounterOneTwo == 0:
+                i = i + 1
+            if CounterOneThree == 0:
+                i = i + 1
+            if CounterOneFour == 0:
+                i = i + 1
+            if CounterOneFive == 0:
+                i = i + 1
+            if CounterTwoOne == 0:
+                i = i + 1
+            if CounterTwoTwo == 0:
+                i = i + 1
+            if CounterTwoThree == 0:
+                i = i + 1
+            if CounterTwoFour == 0:
+                i = i + 1
+            if CounterTwoFive == 0:
+                i = i + 1
+            if 353 < centroids[labels][0] < 370:
+                if CounterTwoSix == 0:
+                    lists[i] = "2.6:Strongly Agree"
+                    i = i + 1
+                    CounterTwoSix = CounterTwoSix + 1
+            if 383 < centroids[labels][0] < 400:
+                if CounterTwoSix == 0:
+                    lists[i] = "2.6:Agree"
+                    i = i + 1
+                    CounterTwoSix = CounterTwoSix + 1
+                elif CounterTwoSix > 0:
+                    lists[i - 1] = "Incorrect Answer"
+            if 415 < centroids[labels][0] < 435:
+                if CounterTwoSix == 0:
+                    lists[i] = "2.6:Natural"
+                    i = i + 1
+                    CounterTwoSix = CounterTwoSix + 1
+                elif CounterTwoSix > 0:
+                    lists[i - 1] = "Incorrect Answer"
+            if 447 < centroids[labels][0] < 465:
+                if CounterTwoSix == 0:
+                    lists[i] = "2.6:DisAgree"
+                    i = i + 1
+                    CounterTwoSix = CounterTwoSix + 1
+                elif CounterTwoSix > 0:
+                    lists[i - 1] = "Incorrect Answer"
+            if 477 < centroids[labels][0] < 495:
+                if CounterTwoSix == 0:
+                    lists[i] = "2.6:Strongly DisAgree"
+                    i = i + 1
+                    CounterTwoSix = CounterTwoSix + 1
+                elif CounterTwoSix > 0:
+                    lists[i - 1] = "Incorrect Answer"
+        # -------------------------------------------------------------------------
+        if 500 < centroids[labels][1] < 507:
+            if CounterGender == 0:
+                i = i + 1
+            if CounterTerm == 0:
+                i = i + 1
+            if CounterMajor == 0:
+                i = i + 1
+            if CounterOneOne == 0:
+                i = i + 1
+            if CounterOneTwo == 0:
+                i = i + 1
+            if CounterOneThree == 0:
+                i = i + 1
+            if CounterOneFour == 0:
+                i = i + 1
+            if CounterOneFive == 0:
+                i = i + 1
+            if CounterTwoOne == 0:
+                i = i + 1
+            if CounterTwoTwo == 0:
+                i = i + 1
+            if CounterTwoThree == 0:
+                i = i + 1
+            if CounterTwoFour == 0:
+                i = i + 1
+            if CounterTwoFive == 0:
+                i = i + 1
+            if CounterTwoSix == 0:
+                i = i + 1
+            if 353 < centroids[labels][0] < 370:
+                if CounterThreeOne == 0:
+                    lists[i] = "3.1:Strongly Agree"
+                    i = i + 1
+                    CounterThreeOne = CounterThreeOne + 1
+            if 383 < centroids[labels][0] < 400:
+                if CounterThreeOne == 0:
+                    lists[i] = "3.1:Agree"
+                    i = i + 1
+                    CounterThreeOne = CounterThreeOne + 1
+                elif CounterThreeOne > 0:
+                    lists[i - 1] = "Incorrect Answer"
+            if 415 < centroids[labels][0] < 435:
+                if CounterThreeOne == 0:
+                    lists[i] = "3.1:Natural"
+                    i = i + 1
+                    CounterThreeOne = CounterThreeOne + 1
+                elif CounterThreeOne > 0:
+                    lists[i - 1] = "Incorrect Answer"
+            if 447 < centroids[labels][0] < 465:
+                if CounterThreeOne == 0:
+                    lists[i] = "3.1:DisAgree"
+                    i = i + 1
+                    CounterThreeOne = CounterThreeOne + 1
+                elif CounterThreeOne > 0:
+                    lists[i - 1] = "Incorrect Answer"
+            if 477 < centroids[labels][0] < 495:
+                if CounterThreeOne == 0:
+                    lists[i] = "3.1:Strongly DisAgree"
+                    i = i + 1
+                    CounterThreeOne = CounterThreeOne + 1
+                elif CounterThreeOne > 0:
+                    lists[i - 1] = "Incorrect Answer"
+        # -------------------------------------------------------------------------
+        if 512 < centroids[labels][1] < 520:
+            if CounterGender == 0:
+                i = i + 1
+            if CounterTerm == 0:
+                i = i + 1
+            if CounterMajor == 0:
+                i = i + 1
+            if CounterOneOne == 0:
+                i = i + 1
+            if CounterOneTwo == 0:
+                i = i + 1
+            if CounterOneThree == 0:
+                i = i + 1
+            if CounterOneFour == 0:
+                i = i + 1
+            if CounterOneFive == 0:
+                i = i + 1
+            if CounterTwoOne == 0:
+                i = i + 1
+            if CounterTwoTwo == 0:
+                i = i + 1
+            if CounterTwoThree == 0:
+                i = i + 1
+            if CounterTwoFour == 0:
+                i = i + 1
+            if CounterTwoFive == 0:
+                i = i + 1
+            if CounterTwoSix == 0:
+                i = i + 1
+            if CounterThreeOne == 0:
+                i = i + 1
+            if 353 < centroids[labels][0] < 370:
+                if CounterThreeTwo == 0:
+                    lists[i] = "3.2:Strongly Agree"
+                    i = i + 1
+                    CounterThreeTwo = CounterThreeTwo + 1
+            if 384 < centroids[labels][0] < 400:
+                if CounterThreeTwo == 0:
+                    lists[i] = "3.2:Agree"
+                    i = i + 1
+                    CounterThreeTwo = CounterThreeTwo + 1
+                elif CounterThreeTwo > 0:
+                    lists[i - 1] = "Incorrect Answer"
+            if 415 < centroids[labels][0] < 435:
+                if CounterThreeTwo == 0:
+                    lists[i] = "3.2:Natural"
+                    i = i + 1
+                    CounterThreeTwo = CounterThreeTwo + 1
+                elif CounterThreeTwo > 0:
+                    lists[i - 1] = "Incorrect Answer"
+            if 447 < centroids[labels][0] < 465:
+                if CounterThreeTwo == 0:
+                    lists[i] = "3.2:DisAgree"
+                    i = i + 1
+                    CounterThreeTwo = CounterThreeTwo + 1
+                elif CounterThreeTwo > 0:
+                    lists[i - 1] = "Incorrect Answer"
+            if 477 < centroids[labels][0] < 495:
+                if CounterThreeTwo == 0:
+                    lists[i] = "3.2:Strongle DisAgree"
+                    i = i + 1
+                    CounterThreeTwo = CounterThreeTwo + 1
+                elif CounterThreeTwo > 0:
+                    lists[i - 1] = "Incorrect Answer"
+        # -------------------------------------------------------------------------
+        if 525 < centroids[labels][1] < 535:
+            if CounterGender == 0:
+                i = i + 1
+            if CounterTerm == 0:
+                i = i + 1
+            if CounterMajor == 0:
+                i = i + 1
+            if CounterOneOne == 0:
+                i = i + 1
+            if CounterOneTwo == 0:
+                i = i + 1
+            if CounterOneThree == 0:
+                i = i + 1
+            if CounterOneFour == 0:
+                i = i + 1
+            if CounterOneFive == 0:
+                i = i + 1
+            if CounterTwoOne == 0:
+                i = i + 1
+            if CounterTwoTwo == 0:
+                i = i + 1
+            if CounterTwoThree == 0:
+                i = i + 1
+            if CounterTwoFour == 0:
+                i = i + 1
+            if CounterTwoFive == 0:
+                i = i + 1
+            if CounterTwoSix == 0:
+                i = i + 1
+            if CounterThreeOne == 0:
+                i = i + 1
+            if CounterThreeTwo == 0:
+                i = i + 1
+            if 352 < centroids[labels][0] < 370:
+                if CounterThreeThree == 0:
+                    lists[i] = "3.3:Strongly Agree"
+                    i = i + 1
+                    CounterThreeThree = CounterThreeThree + 1
+            if 384 < centroids[labels][0] < 400:
+                if CounterThreeThree == 0:
+                    lists[i] = "3.3:Agree"
+                    i = i + 1
+                    CounterThreeThree = CounterThreeThree + 1
+                elif CounterThreeThree > 0:
+                    lists[i - 1] = "Incorrect Answer"
+            if 415 < centroids[labels][0] < 435:
+                if CounterThreeThree == 0:
+                    lists[i] = "3.3:Natural"
+                    i = i + 1
+                    CounterThreeThree = CounterThreeThree + 1
+                elif CounterThreeThree > 0:
+                    lists[i - 1] = "Incorrect Answer"
+            if 447 < centroids[labels][0] < 465:
+                if CounterThreeThree == 0:
+                    lists[i] = "3.3:DisAgree"
+                    i = i + 1
+                    CounterThreeThree = CounterThreeThree + 1
+                elif CounterThreeThree > 0:
+                    lists[i - 1] = "Incorrect Answer"
+            if 477 < centroids[labels][0] < 495:
+                if CounterThreeThree == 0:
+                    lists[i] = "3.3:Strongly DisAgree"
+                    i = i + 1
+                    CounterThreeThree = CounterThreeThree + 1
+                elif CounterThreeThree > 0:
+                    lists[i - 1] = "Incorrect Answer"
+            if 556 < centroids[labels][1] < 572:
+                if CounterGender == 0:
+                    i = i + 1
+                if CounterTerm == 0:
+                    i = i + 1
+                if CounterMajor == 0:
+                    i = i + 1
+                if CounterOneOne == 0:
+                    i = i + 1
+                if CounterOneTwo == 0:
+                    i = i + 1
+                if CounterOneThree == 0:
+                    i = i + 1
+                if CounterOneFour == 0:
+                    i = i + 1
+                if CounterOneFive == 0:
+                    i = i + 1
+                if CounterTwoOne == 0:
+                    i = i + 1
+                if CounterTwoTwo == 0:
+                    i = i + 1
+                if CounterTwoThree == 0:
+                    i = i + 1
+                if CounterTwoFour == 0:
+                    i = i + 1
+                if CounterTwoFive == 0:
+                    i = i + 1
+                if CounterTwoSix == 0:
+                    i = i + 1
+                if CounterThreeOne == 0:
+                    i = i + 1
+                if CounterThreeTwo == 0:
+                    i = i + 1
+                if CounterThreeThree == 0:
+                    i = i + 1
+                if 353 < centroids[labels][0] < 370:
+                    if CounterFourOne == 0:
+                        lists[i] = "4.1:Strongly Agree"
+                        i = i + 1
+                        CounterFourOne = CounterFourOne + 1
+                if 383 < centroids[labels][0] < 400:
+                    if CounterFourOne == 0:
+                        lists[i] = "4.1:Agree"
+                        i = i + 1
+                        CounterFourOne = CounterFourOne + 1
+                    elif CounterFourOne > 0:
+                        lists[i - 1] = "Incorrect Answer"
+                if 415 < centroids[labels][0] < 435:
+                    if CounterFourOne == 0:
+                        lists[i] = "4.1:Natural"
+                        i = i + 1
+                        CounterFourOne = CounterFourOne + 1
+                    elif CounterFourOne > 0:
+                        lists[i - 1] = "Incorrect Answer"
+                if 447 < centroids[labels][0] < 465:
+                    if CounterFourOne == 0:
+                        lists[i] = "4.1:DisAgree"
+                        i = i + 1
+                        CounterFourOne = CounterFourOne + 1
+                    elif CounterFourOne > 0:
+                        lists[i - 1] = "Incorrect Answer"
+                if 477 < centroids[labels][0] < 495:
+                    if CounterFourOne == 0:
+                        lists[i] = "4.1:Srongly DisAgree"
+                        i = i + 1
+                        CounterFourOne = CounterFourOne + 1
+                    elif CounterFourOne > 0:
+                        lists[i - 1] = "Incorrect Answer"
+            # -------------------------------------------------------------------------
+            if 578 < centroids[labels][1] < 587:
+                if CounterGender == 0:
+                    i = i + 1
+                if CounterTerm == 0:
+                    i = i + 1
+                if CounterMajor == 0:
+                    i = i + 1
+                if CounterOneOne == 0:
+                    i = i + 1
+                if CounterOneTwo == 0:
+                    i = i + 1
+                if CounterOneThree == 0:
+                    i = i + 1
+                if CounterOneFour == 0:
+                    i = i + 1
+                if CounterOneFive == 0:
+                    i = i + 1
+                if CounterTwoOne == 0:
+                    i = i + 1
+                if CounterTwoTwo == 0:
+                    i = i + 1
+                if CounterTwoThree == 0:
+                    i = i + 1
+                if CounterTwoFour == 0:
+                    i = i + 1
+                if CounterTwoFive == 0:
+                    i = i + 1
+                if CounterTwoSix == 0:
+                    i = i + 1
+                if CounterThreeOne == 0:
+                    i = i + 1
+                if CounterThreeTwo == 0:
+                    i = i + 1
+                if CounterThreeThree == 0:
+                    i = i + 1
+                if CounterFourOne == 0:
+                    i = i + 1
+                if 354 < centroids[labels][0] < 370:
+                    if CounterFourTwo == 0:
+                        lists[i] = "4.2:Strongly Agree"
+                        i = i + 1
+                        CounterFourTwo = CounterFourTwo + 1
+                if 384 < centroids[labels][0] < 400:
+                    if CounterFourTwo == 0:
+                        lists[i] = "4.2:Agree"
+                        i = i + 1
+                        CounterFourTwo = CounterFourTwo + 1
+                    elif CounterFourTwo > 0:
+                        lists[i - 1] = "Incorrect Answer"
+                if 415 < centroids[labels][0] < 435:
+                    if CounterFourTwo == 0:
+                        lists[i] = "4.2:natural"
+                        i = i + 1
+                        CounterFourTwo = CounterFourTwo + 1
+                    elif CounterFourTwo > 0:
+                        lists[i - 1] = "Incorrect Answer"
+                if 447 < centroids[labels][0] < 465:
+                    if CounterFourTwo == 0:
+                        lists[i] = "4.2:DisAgree"
+                        i = i + 1
+                        CounterFourTwo = CounterFourTwo + 1
+                    elif CounterFourTwo > 0:
+                        lists[i - 1] = "Incorrect Answer"
+                if 477 < centroids[labels][0] < 495:
+                    if CounterFourTwo == 0:
+                        lists[i] = "4.2:Strongly DisAgree"
+                        i = i + 1
+                        CounterFourTwo = CounterFourTwo + 1
+                    elif CounterFourTwo > 0:
+                        lists[i - 1] = "Incorrect Answer"
+            # -------------------------------------------------------------------------
+            if 602 < centroids[labels][1] < 612:
+                if CounterGender == 0:
+                    i = i + 1
+                if CounterTerm == 0:
+                    i = i + 1
+                if CounterMajor == 0:
+                    i = i + 1
+                if CounterOneOne == 0:
+                    i = i + 1
+                if CounterOneTwo == 0:
+                    i = i + 1
+                if CounterOneThree == 0:
+                    i = i + 1
+                if CounterOneFour == 0:
+                    i = i + 1
+                if CounterOneFive == 0:
+                    i = i + 1
+                if CounterTwoOne == 0:
+                    i = i + 1
+                if CounterTwoTwo == 0:
+                    i = i + 1
+                if CounterTwoThree == 0:
+                    i = i + 1
+                if CounterTwoFour == 0:
+                    i = i + 1
+                if CounterTwoFive == 0:
+                    i = i + 1
+                if CounterTwoSix == 0:
+                    i = i + 1
+                if CounterThreeOne == 0:
+                    i = i + 1
+                if CounterThreeTwo == 0:
+                    i = i + 1
+                if CounterThreeThree == 0:
+                    i = i + 1
+                if CounterFourOne == 0:
+                    i = i + 1
+                if CounterFourTwo == 0:
+                    i = i + 1
+                if 353 < centroids[labels][0] < 370:
+                    if CounterFourThree == 0:
+                        lists[i] = "4.3:Strongly Agree"
+                        i = i + 1
+                        CounterFourThree = CounterFourThree + 1
+                if 383 < centroids[labels][0] < 400:
+                    if CounterFourThree == 0:
+                        lists[i] = "4.3:Agree"
+                        i = i + 1
+                        CounterFourThree = CounterFourThree + 1
+                    elif CounterFourThree > 0:
+                        lists[i - 1] = "Incorrect Answer"
+                if 415 < centroids[labels][0] < 435:
+                    if CounterFourThree == 0:
+                        lists[i] = "4.3:Natural"
+                        i = i + 1
+                        CounterFourThree = CounterFourThree + 1
+                    elif CounterFourThree > 0:
+                        lists[i - 1] = "Incorrect Answer"
+                if 447 < centroids[labels][0] < 465:
+                    if CounterFourThree == 0:
+                        lists[i] = "4.3:DisAgree"
+                        i = i + 1
+                        CounterFourThree = CounterFourThree + 1
+                    elif CounterFourThree > 0:
+                        lists[i - 1] = "Incorrect Answer"
+                if 477 < centroids[labels][0] < 495:
+                    if CounterFourThree == 0:
+                        lists[i] = "4.3:Strongly DisAgree"
+                        i = i + 1
+                        CounterFourThree = CounterFourThree + 1
+                    elif CounterFourThree > 0:
+                        lists[i - 1] = "Incorrect Answer"
+            # -------------------------------------------------------------------------
+            if 639 < centroids[labels][1] < 651:
+                if CounterGender == 0:
+                    i = i + 1
+                if CounterTerm == 0:
+                    i = i + 1
+                if CounterMajor == 0:
+                    i = i + 1
+                if CounterOneOne == 0:
+                    i = i + 1
+                if CounterOneTwo == 0:
+                    i = i + 1
+                if CounterOneThree == 0:
+                    i = i + 1
+                if CounterOneFour == 0:
+                    i = i + 1
+                if CounterOneFive == 0:
+                    i = i + 1
+                if CounterTwoOne == 0:
+                    i = i + 1
+                if CounterTwoTwo == 0:
+                    i = i + 1
+                if CounterTwoThree == 0:
+                    i = i + 1
+                if CounterTwoFour == 0:
+                    i = i + 1
+                if CounterTwoFive == 0:
+                    i = i + 1
+                if CounterTwoSix == 0:
+                    i = i + 1
+                if CounterThreeOne == 0:
+                    i = i + 1
+                if CounterThreeTwo == 0:
+                    i = i + 1
+                if CounterThreeThree == 0:
+                    i = i + 1
+                if CounterFourOne == 0:
+                    i = i + 1
+                if CounterFourTwo == 0:
+                    i = i + 1
+                if CounterFourThree == 0:
+                    i = i + 1
+                if 353 < centroids[labels][0] < 370:
+                    if CounterFiveOne == 0:
+                        lists[i] = "5.1:Strongly Agree"
+                        i = i + 1
+                        CounterFiveOne = CounterFiveOne + 1
+                if 383 < centroids[labels][0] < 400:
+                    if CounterFiveOne == 0:
+                        lists[i] = "5.1:Agree"
+                        i = i + 1
+                        CounterFiveOne = CounterFiveOne + 1
+                    elif CounterFiveOne > 0:
+                        lists[i - 1] = "Incorrect Answer"
+                if 415 < centroids[labels][0] < 435:
+                    if CounterFiveOne == 0:
+                        lists[i] = "5.1:Natural"
+                        i = i + 1
+                        CounterFiveOne = CounterFiveOne + 1
+                    elif CounterFiveOne > 0:
+                        lists[i - 1] = "Incorrect Answer"
+                if 447 < centroids[labels][0] < 465:
+                    if CounterFiveOne == 0:
+                        lists[i] = "5.1:DisAgree"
+                        i = i + 1
+                        CounterFiveOne = CounterFiveOne + 1
+                    elif CounterFiveOne > 0:
+                        lists[i - 1] = "Incorrect Answer"
+                if 477 < centroids[labels][0] < 495:
+                    if CounterFiveOne == 0:
+                        lists[i] = "5.1:Strongly DisAgree"
+                        i = i + 1
+                        CounterFiveOne = CounterFiveOne + 1
+                    elif CounterFiveOne > 0:
+                        lists[i - 1] = "Incorrect Answer"
+            # -------------------------------------------------------------------------
+            if 651 < centroids[labels][1] < 665:
+                if CounterGender == 0:
+                    i = i + 1
+                if CounterTerm == 0:
+                    i = i + 1
+                if CounterMajor == 0:
+                    i = i + 1
+                if CounterOneOne == 0:
+                    i = i + 1
+                if CounterOneTwo == 0:
+                    i = i + 1
+                if CounterOneThree == 0:
+                    i = i + 1
+                if CounterOneFour == 0:
+                    i = i + 1
+                if CounterOneFive == 0:
+                    i = i + 1
+                if CounterTwoOne == 0:
+                    i = i + 1
+                if CounterTwoTwo == 0:
+                    i = i + 1
+                if CounterTwoThree == 0:
+                    i = i + 1
+                if CounterTwoFour == 0:
+                    i = i + 1
+                if CounterTwoFive == 0:
+                    i = i + 1
+                if CounterTwoSix == 0:
+                    i = i + 1
+                if CounterThreeOne == 0:
+                    i = i + 1
+                if CounterThreeTwo == 0:
+                    i = i + 1
+                if CounterThreeThree == 0:
+                    i = i + 1
+                if CounterFourOne == 0:
+                    i = i + 1
+                if CounterFourTwo == 0:
+                    i = i + 1
+                if CounterFourThree == 0:
+                    i = i + 1
+                if CounterFiveOne == 0:
+                    i = i + 1
+                if 353 < centroids[labels][0] < 370:
+                    if CounterFiveTwo == 0:
+                        lists[i] = "5.2:Strongly Agree"
+                        i = i + 1
+                        CounterFiveTwo = CounterFiveTwo + 1
+                if 383 < centroids[labels][0] < 400:
+                    if CounterFiveTwo == 0:
+                        lists[i] = "5.2:Agree"
+                        i = i + 1
+                        CounterFiveTwo = CounterFiveTwo + 1
+                    elif CounterFiveTwo > 0:
+                        lists[i - 1] = "Incorrect Answer"
+                if 415 < centroids[labels][0] < 435:
+                    if CounterFiveTwo == 0:
+                        lists[i] = "5.2:Natural"
+                        i = i + 1
+                        CounterFiveTwo = CounterFiveTwo + 1
+                    elif CounterFiveTwo > 0:
+                        lists[i - 1] = "Incorrect Answer"
+                if 447 < centroids[labels][0] < 465:
+                    if CounterFiveTwo == 0:
+                        lists[i] = "5.2:DisAgree"
+                        i = i + 1
+                        CounterFiveTwo = CounterFiveTwo + 1
+                    elif CounterFiveTwo > 0:
+                        lists[i - 1] = "Incorrect Answer"
+                if 447 < centroids[labels][0] < 495:
+                    if CounterFiveTwo == 0:
+                        lists[i] = "5.2:Strongly DisAgree"
+                        i = i + 1
+                        CounterFiveTwo = CounterFiveTwo + 1
+                    elif CounterFiveTwo > 0:
+                        lists[i - 1] = "Incorrect Answer"
+# ------------------------------------------------------------------------------
+        if 556 < centroids[labels][1] < 572:
+            if CounterGender == 0:
+                i = i + 1
+            if CounterTerm == 0:
+                i = i + 1
+            if CounterMajor == 0:
+                i = i + 1
+            if CounterOneOne == 0:
+                i = i + 1
+            if CounterOneTwo == 0:
+                i = i + 1
+            if CounterOneThree == 0:
+                i = i + 1
+            if CounterOneFour == 0:
+                i = i + 1
+            if CounterOneFive == 0:
+                i = i + 1
+            if CounterTwoOne == 0:
+                i = i + 1
+            if CounterTwoTwo == 0:
+                i = i + 1
+            if CounterTwoThree == 0:
+                i = i + 1
+            if CounterTwoFour == 0:
+                i = i + 1
+            if CounterTwoFive == 0:
+                i = i + 1
+            if CounterTwoSix == 0:
+                i = i + 1
+            if CounterThreeOne == 0:
+                i = i + 1
+            if CounterThreeTwo == 0:
+                i = i + 1
+            if CounterThreeThree == 0:
+                i = i + 1
+            if 353 < centroids[labels][0] < 370:
+                if CounterFourOne == 0:
+                    lists[i] = "4.1:Strongly Agree"
+                    i = i + 1
+                    CounterFourOne = CounterFourOne + 1
+            if 383 < centroids[labels][0] < 400:
+                if CounterFourOne == 0:
+                    lists[i] = "4.1:Agree"
+                    i = i + 1
+                    CounterFourOne = CounterFourOne + 1
+                elif CounterFourOne > 0:
+                    lists[i - 1] = "Incorrect Answer"
+            if 415 < centroids[labels][0] < 435:
+                if CounterFourOne == 0:
+                    lists[i] = "4.1:Natural"
+                    i = i + 1
+                    CounterFourOne = CounterFourOne + 1
+                elif CounterFourOne > 0:
+                    lists[i - 1] = "Incorrect Answer"
+            if 447 < centroids[labels][0] < 465:
+                if CounterFourOne == 0:
+                    lists[i] = "4.1:DisAgree"
+                    i = i + 1
+                    CounterFourOne = CounterFourOne + 1
+                elif CounterFourOne > 0:
+                    lists[i - 1] = "Incorrect Answer"
+            if 477 < centroids[labels][0] < 495:
+                if CounterFourOne == 0:
+                    lists[i] = "4.1:Srongly DisAgree"
+                    i = i + 1
+                    CounterFourOne = CounterFourOne + 1
+                elif CounterFourOne > 0:
+                    lists[i - 1] = "Incorrect Answer"
+        # -------------------------------------------------------------------------
+        if 578 < centroids[labels][1] < 587:
+            if CounterGender == 0:
+                i = i + 1
+            if CounterTerm == 0:
+                i = i + 1
+            if CounterMajor == 0:
+                i = i + 1
+            if CounterOneOne == 0:
+                i = i + 1
+            if CounterOneTwo == 0:
+                i = i + 1
+            if CounterOneThree == 0:
+                i = i + 1
+            if CounterOneFour == 0:
+                i = i + 1
+            if CounterOneFive == 0:
+                i = i + 1
+            if CounterTwoOne == 0:
+                i = i + 1
+            if CounterTwoTwo == 0:
+                i = i + 1
+            if CounterTwoThree == 0:
+                i = i + 1
+            if CounterTwoFour == 0:
+                i = i + 1
+            if CounterTwoFive == 0:
+                i = i + 1
+            if CounterTwoSix == 0:
+                i = i + 1
+            if CounterThreeOne == 0:
+                i = i + 1
+            if CounterThreeTwo == 0:
+                i = i + 1
+            if CounterThreeThree == 0:
+                i = i + 1
+            if CounterFourOne == 0:
+                i = i + 1
+            if 354 < centroids[labels][0] < 370:
+                if CounterFourTwo == 0:
+                    lists[i] = "4.2:Strongly Agree"
+                    i = i + 1
+                    CounterFourTwo = CounterFourTwo + 1
+            if 384 < centroids[labels][0] < 400:
+                if CounterFourTwo == 0:
+                    lists[i] = "4.2:Agree"
+                    i = i + 1
+                    CounterFourTwo = CounterFourTwo + 1
+                elif CounterFourTwo > 0:
+                    lists[i - 1] = "Incorrect Answer"
+            if 415 < centroids[labels][0] < 435:
+                if CounterFourTwo == 0:
+                    lists[i] = "4.2:natural"
+                    i = i + 1
+                    CounterFourTwo = CounterFourTwo + 1
+                elif CounterFourTwo > 0:
+                    lists[i - 1] = "Incorrect Answer"
+            if 447 < centroids[labels][0] < 465:
+                if CounterFourTwo == 0:
+                    lists[i] = "4.2:DisAgree"
+                    i = i + 1
+                    CounterFourTwo = CounterFourTwo + 1
+                elif CounterFourTwo > 0:
+                    lists[i - 1] = "Incorrect Answer"
+            if 477 < centroids[labels][0] < 495:
+                if CounterFourTwo == 0:
+                    lists[i] = "4.2:Strongly DisAgree"
+                    i = i + 1
+                    CounterFourTwo = CounterFourTwo + 1
+                elif CounterFourTwo > 0:
+                    lists[i - 1] = "Incorrect Answer"
+        # -------------------------------------------------------------------------
+        if 602 < centroids[labels][1] < 612:
+            if CounterGender == 0:
+                i = i + 1
+            if CounterTerm == 0:
+                i = i + 1
+            if CounterMajor == 0:
+                i = i + 1
+            if CounterOneOne == 0:
+                i = i + 1
+            if CounterOneTwo == 0:
+                i = i + 1
+            if CounterOneThree == 0:
+                i = i + 1
+            if CounterOneFour == 0:
+                i = i + 1
+            if CounterOneFive == 0:
+                i = i + 1
+            if CounterTwoOne == 0:
+                i = i + 1
+            if CounterTwoTwo == 0:
+                i = i + 1
+            if CounterTwoThree == 0:
+                i = i + 1
+            if CounterTwoFour == 0:
+                i = i + 1
+            if CounterTwoFive == 0:
+                i = i + 1
+            if CounterTwoSix == 0:
+                i = i + 1
+            if CounterThreeOne == 0:
+                i = i + 1
+            if CounterThreeTwo == 0:
+                i = i + 1
+            if CounterThreeThree == 0:
+                i = i + 1
+            if CounterFourOne == 0:
+                i = i + 1
+            if CounterFourTwo == 0:
+                i = i + 1
+            if 353 < centroids[labels][0] < 370:
+                if CounterFourThree == 0:
+                    lists[i] = "4.3:Strongly Agree"
+                    i = i + 1
+                    CounterFourThree = CounterFourThree + 1
+            if 383 < centroids[labels][0] < 400:
+                if CounterFourThree == 0:
+                    lists[i] = "4.3:Agree"
+                    i = i + 1
+                    CounterFourThree = CounterFourThree + 1
+                elif CounterFourThree > 0:
+                    lists[i - 1] = "Incorrect Answer"
+            if 415 < centroids[labels][0] < 435:
+                if CounterFourThree == 0:
+                    lists[i] = "4.3:Natural"
+                    i = i + 1
+                    CounterFourThree = CounterFourThree + 1
+                elif CounterFourThree > 0:
+                    lists[i - 1] = "Incorrect Answer"
+            if 447 < centroids[labels][0] < 465:
+                if CounterFourThree == 0:
+                    lists[i] = "4.3:DisAgree"
+                    i = i + 1
+                    CounterFourThree = CounterFourThree + 1
+                elif CounterFourThree > 0:
+                    lists[i - 1] = "Incorrect Answer"
+            if 477 < centroids[labels][0] < 495:
+                if CounterFourThree == 0:
+                    lists[i] = "4.3:Strongly DisAgree"
+                    i = i + 1
+                    CounterFourThree = CounterFourThree + 1
+                elif CounterFourThree > 0:
+                    lists[i - 1] = "Incorrect Answer"
+        # -------------------------------------------------------------------------
+        if 639 < centroids[labels][1] < 651:
+            if CounterGender == 0:
+                i = i + 1
+            if CounterTerm == 0:
+                i = i + 1
+            if CounterMajor == 0:
+                i = i + 1
+            if CounterOneOne == 0:
+                i = i + 1
+            if CounterOneTwo == 0:
+                i = i + 1
+            if CounterOneThree == 0:
+                i = i + 1
+            if CounterOneFour == 0:
+                i = i + 1
+            if CounterOneFive == 0:
+                i = i + 1
+            if CounterTwoOne == 0:
+                i = i + 1
+            if CounterTwoTwo == 0:
+                i = i + 1
+            if CounterTwoThree == 0:
+                i = i + 1
+            if CounterTwoFour == 0:
+                i = i + 1
+            if CounterTwoFive == 0:
+                i = i + 1
+            if CounterTwoSix == 0:
+                i = i + 1
+            if CounterThreeOne == 0:
+                i = i + 1
+            if CounterThreeTwo == 0:
+                i = i + 1
+            if CounterThreeThree == 0:
+                i = i + 1
+            if CounterFourOne == 0:
+                i = i + 1
+            if CounterFourTwo == 0:
+                i = i + 1
+            if CounterFourThree == 0:
+                i = i + 1
+            if 353 < centroids[labels][0] < 370:
+                if CounterFiveOne == 0:
+                    lists[i] = "5.1:Strongly Agree"
+                    i = i + 1
+                    CounterFiveOne = CounterFiveOne + 1
+            if 383 < centroids[labels][0] < 400:
+                if CounterFiveOne == 0:
+                    lists[i] = "5.1:Agree"
+                    i = i + 1
+                    CounterFiveOne = CounterFiveOne + 1
+                elif CounterFiveOne > 0:
+                    lists[i - 1] = "Incorrect Answer"
+            if 415 < centroids[labels][0] < 435:
+                if CounterFiveOne == 0:
+                    lists[i] = "5.1:Natural"
+                    i = i + 1
+                    CounterFiveOne = CounterFiveOne + 1
+                elif CounterFiveOne > 0:
+                    lists[i - 1] = "Incorrect Answer"
+            if 447 < centroids[labels][0] < 465:
+                if CounterFiveOne == 0:
+                    lists[i] = "5.1:DisAgree"
+                    i = i + 1
+                    CounterFiveOne = CounterFiveOne + 1
+                elif CounterFiveOne > 0:
+                    lists[i - 1] = "Incorrect Answer"
+            if 477 < centroids[labels][0] < 495:
+                if CounterFiveOne == 0:
+                    lists[i] = "5.1:Strongly DisAgree"
+                    i = i + 1
+                    CounterFiveOne = CounterFiveOne + 1
+                elif CounterFiveOne > 0:
+                    lists[i - 1] = "Incorrect Answer"
+        # -------------------------------------------------------------------------
+        if 651 < centroids[labels][1] < 665:
+            if CounterGender == 0:
+                i = i + 1
+            if CounterTerm == 0:
+                i = i + 1
+            if CounterMajor == 0:
+                i = i + 1
+            if CounterOneOne == 0:
+                i = i + 1
+            if CounterOneTwo == 0:
+                i = i + 1
+            if CounterOneThree == 0:
+                i = i + 1
+            if CounterOneFour == 0:
+                i = i + 1
+            if CounterOneFive == 0:
+                i = i + 1
+            if CounterTwoOne == 0:
+                i = i + 1
+            if CounterTwoTwo == 0:
+                i = i + 1
+            if CounterTwoThree == 0:
+                i = i + 1
+            if CounterTwoFour == 0:
+                i = i + 1
+            if CounterTwoFive == 0:
+                i = i + 1
+            if CounterTwoSix == 0:
+                i = i + 1
+            if CounterThreeOne == 0:
+                i = i + 1
+            if CounterThreeTwo == 0:
+                i = i + 1
+            if CounterThreeThree == 0:
+                i = i + 1
+            if CounterFourOne == 0:
+                i = i + 1
+            if CounterFourTwo == 0:
+                i = i + 1
+            if CounterFourThree == 0:
+                i = i + 1
+            if CounterFiveOne == 0:
+                i = i + 1
+            if 353 < centroids[labels][0] < 370:
+                if CounterFiveTwo == 0:
+                    lists[i] = "5.2:Strongly Agree"
+                    i = i + 1
+                    CounterFiveTwo = CounterFiveTwo + 1
+            if 383 < centroids[labels][0] < 400:
+                if CounterFiveTwo == 0:
+                    lists[i] = "5.2:Agree"
+                    i = i + 1
+                    CounterFiveTwo = CounterFiveTwo + 1
+                elif CounterFiveTwo > 0:
+                    lists[i - 1] = "Incorrect Answer"
+            if 415 < centroids[labels][0] < 435:
+                if CounterFiveTwo == 0:
+                    lists[i] = "5.2:Natural"
+                    i = i + 1
+                    CounterFiveTwo = CounterFiveTwo + 1
+                elif CounterFiveTwo > 0:
+                    lists[i - 1] = "Incorrect Answer"
+            if 447 < centroids[labels][0] < 465:
+                if CounterFiveTwo == 0:
+                    lists[i] = "5.2:DisAgree"
+                    i = i + 1
+                    CounterFiveTwo = CounterFiveTwo + 1
+                elif CounterFiveTwo > 0:
+                    lists[i - 1] = "Incorrect Answer"
+            if 447 < centroids[labels][0] < 495:
+                if CounterFiveTwo == 0:
+                    lists[i] = "5.2:Strongly DisAgree"
+                    i = i + 1
+                    CounterFiveTwo = CounterFiveTwo + 1
+                elif CounterFiveTwo > 0:
+                    lists[i - 1] = "Incorrect Answer"
+
+        # -------------------------------------------------------------------------
+
+    f = open("demofile2.txt", "w")
+
+    for ss in range(0, i):
+        f.write(lists[ss] + '\n')
+    f.close()
+
+    # open and read the file after the appending:
+    f = open("demofile2.txt", "r")
+    print(f.read())
+# ----------------Angle mora than 0-------------------------------
+if median_angle > 0:
+
+    image_center = tuple(np.array(img.shape[1::-1]) / 2)
+    rot_mat = cv2.getRotationMatrix2D(image_center, median_angle, 1.0)
+    result = cv2.warpAffine(img, rot_mat, img.shape[1::-1], flags=cv2.INTER_LINEAR)
+    result = cv2.resize(result, (0, 0), fx=0.4, fy=0.4)
+    #    result = cv2.cvtColor(result, cv2.COLOR_BGR2GRAY)
+    ret, result = cv2.threshold(result, 25, 255, cv2.THRESH_BINARY_INV)
+    cv2.imshow("abc", result)
+    output = cv2.connectedComponentsWithStats(result, connectivity=4)  # apply connected components
+    num_labels = output[0]  # gets the number of connected components
+    centroids = output[3]  # gets the center of each object (connected component)
+    lists = ["Gender Not Answerd", "Term Not Answered", "Major Not Answred", "1.1 Not Answered", "1.2 Not Answered",
+             "1.3 Not Answered", "1.4 Not Answered", "1.5 Not Answered", "2.1 Not Answered", "2.2 Not Answered",
+             "2.3 Not Answered", "2.4 Not Answered", "2.5 Not Answered", "2.6 Not Answered", "3.1 Not Answered",
+             "3.2 Not Answered", "3.3 Not Answered", "4.1 Not Answered", "4.2 Not Answered", "4.3 Not Answered",
+             "5.1 Not Answered", "5.1 Not Answered"]
+    i = 0
+
+    for labels in range(0, num_labels):
+        if 60 < centroids[labels][1] < 105:
+            if 435 < centroids[labels][0] < 460:
+                if CounterGender == 0:
+                    lists[i] = "Gender: Female"
+                    CounterGender = CounterGender + 1
+                    i = i + 1
+                elif CounterGender > 0:
+                    lists[i - 1] = "Incorrect Answer"
+            elif 338 < centroids[labels][0] < 425:
+                if CounterGender == 0:
+                    lists[i] = "Gender: Male"
+                    CounterGender = CounterGender + 1
+                    i = i + 1
+
+        if 117 < centroids[labels][1] < 130:
+            if CounterGender == 0:
+                i = i + 1
+            if 155 < centroids[labels][0] < 200:
+                if CounterTerm == 0:
+                    lists[i] = "Semester: Fall"
+                    CounterTerm = CounterTerm + 1
+                    i = i + 1
+            if 235 < centroids[labels][0] < 290:
+                if CounterTerm == 0:
+                    lists[i] = "Semester: Spring"
+                    CounterTerm = CounterTerm + 1
+                    i = i + 1
+                elif CounterTerm > 0:
+                    lists[i - 1] = "Incorrect Answer"
+            if 100 < centroids[labels][1] < 140:
+                if CounterTerm == 0:
+                    lists[i] = "Semester: Summer"
+                    CounterTerm = CounterTerm + 1
+                    i = i + 1
+                elif CounterTerm > 0:
+                    lists[i - 1] = "Incorrect Answer"
+        # -----------------------------------------------------------------------
+        if 135 < centroids[labels][1] < 147:
+            if CounterGender == 0:
+                i = i + 1
+            if CounterTerm == 0:
+                i = i + 1
+            if 130 < centroids[labels][0] < 160:
+                if CounterMajor == 0:
+                    lists[i] = "Major: MCTA"
+                    i = i + 1
+                    CounterMajor = CounterMajor + 1
+            if 168 < centroids[labels][0] < 205:
+                if CounterMajor == 0:
+                    lists[i] = "Major: EVER"
+                    i = i + 1
+                    CounterMajor = CounterMajor + 1
+                elif CounterMajor > 0:
+                    lists[i - 1] = "Incorrect Answer"
+            if 210 < centroids[labels][0] < 245:
+                if CounterMajor == 0:
+                    lists[i] = "Major: BLDG"
+                    i = i + 1
+                    CounterMajor = CounterMajor + 1
+                elif CounterMajor > 0:
+                    lists[i - 1] = "Incorrect Answer"
+            if 250 < centroids[labels][0] < 290:
+                if CounterMajor == 0:
+                    lists[i] = "Major: CESS"
+                    i = i + 1
+                    CounterMajor = CounterMajor + 1
+                elif CounterMajor > 0:
+                    lists[i - 1] = "Incorrect Answer"
+            if 300 < centroids[labels][0] < 335:
+                if CounterMajor == 0:
+                    lists[i] = "Major: ERGY"
+                    i = i + 1
+                    CounterMajor = CounterMajor + 1
+                elif CounterMajor > 0:
+                    lists[i - 1] = "Incorrect Answer"
+            if 340 < centroids[labels][0] < 375:
+                if CounterMajor == 0:
+                    lists[i] = "Major: COMM"
+                    i = i + 1
+                    CounterMajor = CounterMajor + 1
+                elif CounterMajor > 0:
+                    lists[i - 1] = "Incorrect Answer"
+            if 385 < centroids[labels][0] < 430:
+                if CounterMajor == 0:
+                    lists[i] = "Major: Manf"
+                    i = i + 1
+                    CounterMajor = CounterMajor + 1
+                elif CounterMajor > 0:
+                    lists[i - 1] = "Incorrect Answer"
+        if 151 < centroids[labels][1] < 190:
+            if 130 < centroids[labels][0] < 160:
+                if CounterMajor == 0:
+                    lists[i] = "Major: LARR"
+                    i = i + 1
+                    CounterMajor = CounterMajor + 1
+                elif CounterMajor > 0:
+                    lists[i - 1] = "Incorrect Answer"
+            if 170 < centroids[labels][0] < 205:
+                if CounterMajor == 0:
+                    lists[i] = "Major: MATL"
+                    i = i + 1
+                    CounterMajor = CounterMajor + 1
+                elif CounterMajor > 0:
+                    lists[i - 1] = "Incorrect Answer"
+            if 215 < centroids[labels][0] < 245:
+                if CounterMajor == 0:
+                    lists[i] = "Major: CISE"
+                    i = i + 1
+                    CounterMajor = CounterMajor + 1
+                elif CounterMajor > 0:
+                    lists[i - 1] = "Incorrect Answer"
+            if 250 < centroids[labels][0] < 300:
+                if CounterMajor == 0:
+                    lists[i] = "Major: HAUD"
+                    i = i + 1
+                    CounterMajor = CounterMajor + 1
+                elif CounterMajor > 0:
+                    lists[i - 1] = "Incorrect Answer"
+        # ------------------------------------------------------------
+        if 308 < centroids[labels][1] < 316:
+            if CounterGender == 0:
+                i = i + 1
+            if CounterTerm == 0:
+                i = i + 1
+            if CounterMajor == 0:
+                i = i + 1
+            if 356 < centroids[labels][0] < 365:
+                if CounterOneOne == 0:
+                    lists[i] = "1.1: Strongly Agree"
+                    CounterOneOne = CounterOneOne + 1
+                    i = i + 1
+            if 386 < centroids[labels][0] < 396:
+                if CounterOneOne == 0:
+                    lists[i] = "1.1:Agree"
+                    i = i + 1
+                    CounterOneOne = CounterOneOne + 1
+                elif CounterOneOne > 0:
+                    lists[i - 1] = "Incorrect Answer"
+            if 419 < centroids[labels][0] < 430:
+                if CounterOneOne == 0:
+                    lists[i] = "1.1:Natural"
+                    i = i + 1
+                    CounterOneOne = CounterOneOne + 1
+                elif CounterOneOne > 0:
+                    lists[i - 1] = "Incorrect Answer"
+            if 450 < centroids[labels][0] < 462:
+                if CounterOneOne == 0:
+                    lists[i] = "1.1:Disagree"
+                    i = i + 1
+                    CounterOneOne = CounterOneOne + 1
+                elif CounterOneOne > 0:
+                    lists[i - 1] = "Incorrect Answer"
+            if 481 < centroids[labels][0] < 493:
+                if CounterOneOne == 0:
+                    lists[i] = "1.1:Strongly Disagree"
+                    i = i + 1
+                    CounterOneOne = CounterOneOne + 1
+                elif CounterOneOne > 0:
+                    lists[i - 1] = "Incorrect Answer"
+        # --------------------------------------------------------
+        if 320 < centroids[labels][1] < 330:
+            if CounterGender == 0:
+                i = i + 1
+            if CounterTerm == 0:
+                i = i + 1
+            if CounterMajor == 0:
+                i = i + 1
+            if CounterOneOne == 0:
+                i = i + 1
+            if 356 < centroids[labels][0] < 365:
+                if CounterOneTwo == 0:
+                    lists[i] = "1.2: Strongly Agree"
+                    CounterOneTwo = CounterOneTwo + 1
+                    i = i + 1
+            if 386 < centroids[labels][0] < 396:
+                if CounterOneTwo == 0:
+                    lists[i] = "1.2:Agree"
+                    i = i + 1
+                    CounterOneTwo = CounterOneTwo + 1
+                elif CounterOneTwo > 0:
+                    lists[i - 1] = "Incorrect Answer"
+            if 419 < centroids[labels][0] < 430:
+                if CounterOneTwo == 0:
+                    lists[i] = "1.2:Natural"
+                    i = i + 1
+                    CounterOneTwo = CounterOneTwo + 1
+                elif CounterOneTwo > 0:
+                    lists[i - 1] = "Incorrect Answer"
+            if 450 < centroids[labels][0] < 462:
+                if CounterOneTwo == 0:
+                    lists[i] = "1..2:Disagree"
+                    i = i + 1
+                    CounterOneTwo = CounterOneTwo + 1
+                elif CounterOneTwo > 0:
+                    lists[i - 1] = "Incorrect Answer"
+            if 481 < centroids[labels][0] < 493:
+                if CounterOneTwo == 0:
+                    lists[i] = "1.2:Strongly Disagree"
+                    i = i + 1
+                    CounterOneTwo = CounterOneTwo + 1
+                elif CounterOneTwo > 0:
+                    lists[i - 1] = "Incorrect Answer"
+        # --------------------------------------------------------------------------
+        if 333 < centroids[labels][1] < 342:
+            if CounterGender == 0:
+                i = i + 1
+            if CounterTerm == 0:
+                i = i + 1
+            if CounterMajor == 0:
+                i = i + 1
+            if CounterOneOne == 0:
+                i = i + 1
+            if CounterOneTwo == 0:
+                i = i + 1
+            if 356 < centroids[labels][0] < 365:
+                if CounterOneThree == 0:
+                    lists[i] = "1.3: Strongly Agree"
+                    CounterOneTwo = CounterOneTwo + 1
+                    i = i + 1
+            if 386 < centroids[labels][0] < 396:
+                if CounterOneThree == 0:
+                    lists[i] = "1.3: Agree"
+                    i = i + 1
+                    CounterOneThree = CounterOneThree + 1
+                elif CounterOneThree > 0:
+                    lists[i - 1] = "Incorrect Answer"
+            if 419 < centroids[labels][0] < 430:
+                if CounterOneThree == 0:
+                    lists[i] = "1.3: Natural"
+                    i = i + 1
+                    CounterOneThree = CounterOneThree + 1
+                elif CounterOneThree > 0:
+                    lists[i - 1] = "Incorrect Answer"
+            if 450 < centroids[labels][0] < 462:
+                if CounterOneThree == 0:
+                    lists[i] = "1.3: DisAgree"
+                    i = i + 1
+                    CounterOneThree = CounterOneThree + 1
+                elif CounterOneThree > 0:
+                    lists[i - 1] = "Incorrect Answer"
+            if 481 < centroids[labels][0] < 493:
+                if CounterOneThree == 0:
+                    lists[i] = "1.3:Strongly DisAgree"
+                    i = i + 1
+                    CounterOneThree = CounterOneThree + 1
+                elif CounterOneThree > 0:
+                    lists[i - 1] = "Incorrect Answer"
+        # -------------------------------------------------------------------
+        if 348 < centroids[labels][1] < 354:
+            if CounterGender == 0:
+                i = i + 1
+            if CounterTerm == 0:
+                i = i + 1
+            if CounterMajor == 0:
+                i = i + 1
+            if CounterOneOne == 0:
+                i = i + 1
+            if CounterOneTwo == 0:
+                i = i + 1
+            if CounterOneThree == 0:
+                i = i + 1
+            if 356 < centroids[labels][0] < 365:
+                if CounterOneFour == 0:
+                    lists[i] = "1.4: Strongly Agree"
+                    i = i + 1
+                    CounterOneFour = CounterOneFour + 1
+            if 386 < centroids[labels][0] < 396:
+                if CounterOneFour == 0:
+                    lists[i] = "1.4: Agree"
+                    i = i + 1
+                    CounterOneFour = CounterOneFour + 1
+                elif CounterOneFour > 0:
+                    lists[i - 1] = "Incorrect Answer"
+            if 419 < centroids[labels][0] < 430:
+                if CounterOneFour == 0:
+                    lists[i] = "1.4: Natural"
+                    i = i + 1
+                    CounterOneFour = CounterOneFour + 1
+                elif CounterOneFour > 0:
+                    lists[i - 1] = "Incorrect Answer"
+            if 450 < centroids[labels][0] < 462:
+                if CounterOneFour == 0:
+                    lists[i] = "1.4: DisAgree"
+                    i = i + 1
+                    CounterOneFour = CounterOneFour + 1
+                elif CounterOneFour > 0:
+                    lists[i - 1] = "Incorrect Answer"
+            if 481 < centroids[labels][0] < 493:
+                if CounterOneFour == 0:
+                    lists[i] = "1.4:Strongly DisAgree"
+                    i = i + 1
+                    CounterOneFour = CounterOneFour + 1
+                elif CounterOneFour > 0:
+                    lists[i - 1] = "Incorrect Answer"
+        # -----------------------------------------------------------------------
+        if 359 < centroids[labels][1] < 367:
+            if CounterGender == 0:
+                i = i + 1
+            if CounterTerm == 0:
+                i = i + 1
+            if CounterMajor == 0:
+                i = i + 1
+            if CounterOneOne == 0:
+                i = i + 1
+            if CounterOneTwo == 0:
+                i = i + 1
+            if CounterOneThree == 0:
+                i = i + 1
+            if CounterOneFour == 0:
+                i = i + 1
+            if 356 < centroids[labels][0] < 365:
+                if CounterOneFive == 0:
+                    lists[i] = "1.5:Strongly Agree"
+                    i = i + 1
+                    CounterOneFive = CounterOneFive + 1
+            if 386 < centroids[labels][0] < 396:
+                if CounterOneFive == 0:
+                    lists[i] = "1.5:Agree"
+                    i = i + 1
+                    CounterOneFive = CounterOneFive + 1
+                elif CounterOneFive > 0:
+                    lists[i - 1] = "Incorrect Answer"
+            if 419 < centroids[labels][0] < 430:
+                if CounterOneFive == 0:
+                    lists[i] = "1.5:Natural"
+                    i = i + 1
+                    CounterOneFive = CounterOneFive + 1
+                elif CounterOneFive > 0:
+                    lists[i - 1] = "Incorrect Answer"
+            if 450 < centroids[labels][0] < 462:
+                if CounterOneFive == 0:
+                    lists[i] = "1.5:DisAgree"
+                    i = i + 1
+                    CounterOneFive = CounterOneFive + 1
+                elif CounterOneFive > 0:
+                    lists[i - 1] = "Incorrect Answer"
+            if 481 < centroids[labels][0] < 493:
+                if CounterOneFive == 0:
+                    lists[i] = "1.5:Strongly DisAgree"
+                    i = i + 1
+                    CounterOneFive = CounterOneFive + 1
+                elif CounterOneFive > 0:
+                    lists[i - 1] = "Incorrect Answer"
+        # ------------------------------------------------------------------------
+        if 398 < centroids[labels][1] < 406:
+            if CounterGender == 0:
+                i = i + 1
+            if CounterTerm == 0:
+                i = i + 1
+            if CounterMajor == 0:
+                i = i + 1
+            if CounterOneOne == 0:
+                i = i + 1
+            if CounterOneTwo == 0:
+                i = i + 1
+            if CounterOneThree == 0:
+                i = i + 1
+            if CounterOneFour == 0:
+                i = i + 1
+            if CounterOneFive == 0:
+                i = i + 1
+            if 356 < centroids[labels][0] < 365:
+                if CounterTwoOne == 0:
+                    lists[i] = "2.1:Strongly Agree"
+                    i = i + 1
+                    CounterTwoOne = CounterTwoOne + 1
+            if 386 < centroids[labels][0] < 396:
+                if CounterTwoOne == 0:
+                    lists[i] = "2.1:Agree"
+                    i = i + 1
+                    CounterTwoOne = CounterTwoOne + 1
+                elif CounterTwoOne > 0:
+                    lists[i - 1] = "Incorrect Answer"
+            if 419 < centroids[labels][0] < 430:
+                if CounterTwoOne == 0:
+                    lists[i] = "2.1:Natural"
+                    i = i + 1
+                    CounterTwoOne = CounterTwoOne + 1
+                elif CounterTwoOne > 0:
+                    lists[i - 1] = "Incorrect Answer"
+            if 450 < centroids[labels][0] < 462:
+                if CounterTwoOne == 0:
+                    lists[i] = "2.1:DisAgree"
+                    i = i + 1
+                    CounterTwoOne = CounterTwoOne + 1
+                elif CounterTwoOne > 0:
+                    lists[i - 1] = "Incorrect Answer"
+            if 481 < centroids[labels][0] < 493:
+                if CounterTwoOne == 0:
+                    lists[i] = "2.1:Stongly DisAgree"
+                    i = i + 1
+                    CounterTwoOne = CounterTwoOne + 1
+                elif CounterTwoOne > 0:
+                    lists[i - 1] = "Incorrect Answer"
+        # ---------------------------------------------------------------------------
+        if 411 < centroids[labels][1] < 418:
+            if CounterGender == 0:
+                i = i + 1
+            if CounterTerm == 0:
+                i = i + 1
+            if CounterMajor == 0:
+                i = i + 1
+            if CounterOneOne == 0:
+                i = i + 1
+            if CounterOneTwo == 0:
+                i = i + 1
+            if CounterOneThree == 0:
+                i = i + 1
+            if CounterOneFour == 0:
+                i = i + 1
+            if CounterOneFive == 0:
+                i = i + 1
+            if CounterTwoOne == 0:
+                i = i + 1
+            if 356 < centroids[labels][0] < 365:
+                if CounterTwoTwo == 0:
+                    lists[i] = "2.2:Strongly Agree"
+                    i = i + 1
+                    CounterTwoTwo = CounterTwoTwo + 1
+            if 386 < centroids[labels][0] < 396:
+                if CounterTwoTwo == 0:
+                    lists[i] = "2.2:Agree"
+                    i = i + 1
+                    CounterTwoTwo = CounterTwoTwo + 1
+                elif CounterTwoTwo > 0:
+                    lists[i - 1] = "Incorrect Answer"
+            if 419 < centroids[labels][0] < 430:
+                if CounterTwoTwo == 0:
+                    lists[i] = "2.2:Natural"
+                    i = i + 1
+                    CounterTwoTwo = CounterTwoTwo + 1
+                elif CounterTwoTwo > 0:
+                    lists[i - 1] = "Incorrect Answer"
+            if 450 < centroids[labels][0] < 462:
+                if CounterTwoTwo == 0:
+                    lists[i] = "2.2:DisAgree"
+                    i = i + 1
+                    CounterTwoTwo = CounterTwoTwo + 1
+                elif CounterTwoTwo > 0:
+                    lists[i - 1] = "Incorrect Answer"
+            if 481 < centroids[labels][0] < 493:
+                if CounterTwoTwo == 0:
+                    lists[i] = "2.2:Strongly DisAgree"
+                    i = i + 1
+                    CounterTwoTwo = CounterTwoTwo + 1
+                elif CounterTwoTwo > 0:
+                    lists[i - 1] = "Incorrect Answer"
+        # -----------------------------------------------------------------------
+        if 424 < centroids[labels][1] < 431:
+            if CounterGender == 0:
+                i = i + 1
+            if CounterTerm == 0:
+                i = i + 1
+            if CounterMajor == 0:
+                i = i + 1
+            if CounterOneOne == 0:
+                i = i + 1
+            if CounterOneTwo == 0:
+                i = i + 1
+            if CounterOneThree == 0:
+                i = i + 1
+            if CounterOneFour == 0:
+                i = i + 1
+            if CounterOneFive == 0:
+                i = i + 1
+            if CounterTwoOne == 0:
+                i = i + 1
+            if CounterTwoTwo == 0:
+                i = i + 1
+            if 356 < centroids[labels][0] < 365:
+                if CounterTwoThree == 0:
+                    lists[i] = "2.3:Strongly Agree"
+                    i = i + 1
+                    CounterTwoThree = CounterTwoThree + 1
+            if 386 < centroids[labels][0] < 396:
+                if CounterTwoThree == 0:
+                    lists[i] = "2.3:Agree"
+                    i = i + 1
+                    CounterTwoThree = CounterTwoThree + 1
+                elif CounterTwoThree > 0:
+                    lists[i - 1] = "Incorrect Answer"
+            if 419 < centroids[labels][0] < 430:
+                if CounterTwoThree == 0:
+                    lists[i] = "2.3:Natural"
+                    i = i + 1
+                    CounterTwoThree = CounterTwoThree + 1
+                elif CounterTwoThree > 0:
+                    lists[i - 1] = "Incorrect Answer"
+            if 450 < centroids[labels][0] < 462:
+                if CounterTwoThree == 0:
+                    lists[i] = "2.3:DisAgree"
+                    i = i + 1
+                    CounterTwoThree = CounterTwoThree + 1
+                elif CounterTwoThree > 0:
+                    lists[i - 1] = "Incorrect Answer"
+            if 481 < centroids[labels][0] < 493:
+                if CounterTwoThree == 0:
+                    lists[i] = "2.3:Strongle DisAgree"
+                    i = i + 1
+                    CounterTwoThree = CounterTwoThree + 1
+                elif CounterTwoThree > 0:
+                    lists[i - 1] = "Incorrect Answer"
+        # -------------------------------------------------------------------------
+        if 437 < centroids[labels][1] < 443:
+            if CounterGender == 0:
+                i = i + 1
+            if CounterTerm == 0:
+                i = i + 1
+            if CounterMajor == 0:
+                i = i + 1
+            if CounterOneOne == 0:
+                i = i + 1
+            if CounterOneTwo == 0:
+                i = i + 1
+            if CounterOneThree == 0:
+                i = i + 1
+            if CounterOneFour == 0:
+                i = i + 1
+            if CounterOneFive == 0:
+                i = i + 1
+            if CounterTwoOne == 0:
+                i = i + 1
+            if CounterTwoTwo == 0:
+                i = i + 1
+            if CounterTwoThree == 0:
+                i = i + 1
+            if 356 < centroids[labels][0] < 365:
+                if CounterTwoFour == 0:
+                    lists[i] = "2.4:Strongly Agree"
+                    i = i + 1
+                    CounterTwoFour = CounterTwoFour + 1
+            if 386 < centroids[labels][0] < 396:
+                if CounterTwoFour == 0:
+                    lists[i] = "2.4:Agree"
+                    i = i + 1
+                    CounterTwoFour = CounterTwoFour + 1
+                elif CounterTwoFour > 0:
+                    lists[i - 1] = "Incorrect Answer"
+            if 419 < centroids[labels][0] < 430:
+                if CounterTwoFour == 0:
+                    lists[i] = "2.4:Natural"
+                    i = i + 1
+                    CounterTwoFour = CounterTwoFour + 1
+                elif CounterTwoFour > 0:
+                    lists[i - 1] = "Incorrect Answer"
+            if 450 < centroids[labels][0] < 462:
+                if CounterTwoFour == 0:
+                    lists[i] = "2.4:DisAgree"
+                    i = i + 1
+                    CounterTwoFour = CounterTwoFour + 1
+                elif CounterTwoFour > 0:
+                    lists[i - 1] = "Incorrect Answer"
+            if 481 < centroids[labels][0] < 493:
+                if CounterTwoFour == 0:
+                    lists[i] = "2.4:Strongly DisAgree"
+                    i = i + 1
+                    CounterTwoFour = CounterTwoFour + 1
+                elif CounterTwoFour > 0:
+                    lists[i - 1] = "Incorrect Answer"
+        # -------------------------------------------------------------------------
+        if 449 < centroids[labels][1] < 455:
+            if CounterGender == 0:
+                i = i + 1
+            if CounterTerm == 0:
+                i = i + 1
+            if CounterMajor == 0:
+                i = i + 1
+            if CounterOneOne == 0:
+                i = i + 1
+            if CounterOneTwo == 0:
+                i = i + 1
+            if CounterOneThree == 0:
+                i = i + 1
+            if CounterOneFour == 0:
+                i = i + 1
+            if CounterOneFive == 0:
+                i = i + 1
+            if CounterTwoOne == 0:
+                i = i + 1
+            if CounterTwoTwo == 0:
+                i = i + 1
+            if CounterTwoThree == 0:
+                i = i + 1
+            if CounterTwoFour == 0:
+                i = i + 1
+            if 356 < centroids[labels][0] < 365:
+                if CounterTwoFive == 0:
+                    lists[i] = "2.5:Strongly Agree"
+                    i = i + 1
+                    CounterTwoFive = CounterTwoFive + 1
+            if 386 < centroids[labels][0] < 396:
+                if CounterTwoFive == 0:
+                    lists[i] = "2.5:Agree"
+                    i = i + 1
+                    CounterTwoFive = CounterTwoFive + 1
+                elif CounterTwoFive > 0:
+                    lists[i - 1] = "Incorrect Answer"
+            if 419 < centroids[labels][0] < 430:
+                if CounterTwoFive == 0:
+                    lists[i] = "2.5:Natural"
+                    i = i + 1
+                    CounterTwoFive = CounterTwoFive + 1
+                elif CounterTwoFive > 0:
+                    lists[i - 1] = "Incorrect Answer"
+            if 450 < centroids[labels][0] < 462:
+                if CounterTwoFive == 0:
+                    lists[i] = "2.5:DisAgree"
+                    i = i + 1
+                    CounterTwoFive = CounterTwoFive + 1
+                elif CounterTwoFive > 0:
+                    lists[i - 1] = "Incorrect Answer"
+            if 481 < centroids[labels][0] < 493:
+                if CounterTwoFive == 0:
+                    lists[i] = "2.5:Strongly DisAgree"
+                    i = i + 1
+                    CounterTwoFive = CounterTwoFive + 1
+                elif CounterTwoFive > 0:
+                    lists[i - 1] = "Incorrect Answer"
+        # -------------------------------------------------------------------------
+        if 461 < centroids[labels][1] < 470:
+            if CounterGender == 0:
+                i = i + 1
+            if CounterTerm == 0:
+                i = i + 1
+            if CounterMajor == 0:
+                i = i + 1
+            if CounterOneOne == 0:
+                i = i + 1
+            if CounterOneTwo == 0:
+                i = i + 1
+            if CounterOneThree == 0:
+                i = i + 1
+            if CounterOneFour == 0:
+                i = i + 1
+            if CounterOneFive == 0:
+                i = i + 1
+            if CounterTwoOne == 0:
+                i = i + 1
+            if CounterTwoTwo == 0:
+                i = i + 1
+            if CounterTwoThree == 0:
+                i = i + 1
+            if CounterTwoFour == 0:
+                i = i + 1
+            if CounterTwoFive == 0:
+                i = i + 1
+            if 356 < centroids[labels][0] < 365:
+                if CounterTwoSix == 0:
+                    lists[i] = "2.6:Strongly Agree"
+                    i = i + 1
+                    CounterTwoSix = CounterTwoSix + 1
+            if 386 < centroids[labels][0] < 396:
+                if CounterTwoSix == 0:
+                    lists[i] = "2.6:Agree"
+                    i = i + 1
+                    CounterTwoSix = CounterTwoSix + 1
+                elif CounterTwoSix > 0:
+                    lists[i - 1] = "Incorrect Answer"
+            if 419 < centroids[labels][0] < 430:
+                if CounterTwoSix == 0:
+                    lists[i] = "2.6:Natural"
+                    i = i + 1
+                    CounterTwoSix = CounterTwoSix + 1
+                elif CounterTwoSix > 0:
+                    lists[i - 1] = "Incorrect Answer"
+            if 450 < centroids[labels][0] < 462:
+                if CounterTwoSix == 0:
+                    lists[i] = "2.6:DisAgree"
+                    i = i + 1
+                    CounterTwoSix = CounterTwoSix + 1
+                elif CounterTwoSix > 0:
+                    lists[i - 1] = "Incorrect Answer"
+            if 481 < centroids[labels][0] < 493:
+                if CounterTwoSix == 0:
+                    lists[i] = "2.6:Strongly DisAgree"
+                    i = i + 1
+                    CounterTwoSix = CounterTwoSix + 1
+                elif CounterTwoSix > 0:
+                    lists[i - 1] = "Incorrect Answer"
+        # -------------------------------------------------------------------------
+        if 500 < centroids[labels][1] < 507:
+            if CounterGender == 0:
+                i = i + 1
+            if CounterTerm == 0:
+                i = i + 1
+            if CounterMajor == 0:
+                i = i + 1
+            if CounterOneOne == 0:
+                i = i + 1
+            if CounterOneTwo == 0:
+                i = i + 1
+            if CounterOneThree == 0:
+                i = i + 1
+            if CounterOneFour == 0:
+                i = i + 1
+            if CounterOneFive == 0:
+                i = i + 1
+            if CounterTwoOne == 0:
+                i = i + 1
+            if CounterTwoTwo == 0:
+                i = i + 1
+            if CounterTwoThree == 0:
+                i = i + 1
+            if CounterTwoFour == 0:
+                i = i + 1
+            if CounterTwoFive == 0:
+                i = i + 1
+            if CounterTwoSix == 0:
+                i = i + 1
+            if 356 < centroids[labels][0] < 365:
+                if CounterThreeOne == 0:
+                    lists[i] = "3.1:Strongly Agree"
+                    i = i + 1
+                    CounterThreeOne = CounterThreeOne + 1
+            if 386 < centroids[labels][0] < 396:
+                if CounterThreeOne == 0:
+                    lists[i] = "3.1:Agree"
+                    i = i + 1
+                    CounterThreeOne = CounterThreeOne + 1
+                elif CounterThreeOne > 0:
+                    lists[i - 1] = "Incorrect Answer"
+            if 419 < centroids[labels][0] < 430:
+                if CounterThreeOne == 0:
+                    lists[i] = "3.1:Natural"
+                    i = i + 1
+                    CounterThreeOne = CounterThreeOne + 1
+                elif CounterThreeOne > 0:
+                    lists[i - 1] = "Incorrect Answer"
+            if 450 < centroids[labels][0] < 462:
+                if CounterThreeOne == 0:
+                    lists[i] = "3.1:DisAgree"
+                    i = i + 1
+                    CounterThreeOne = CounterThreeOne + 1
+                elif CounterThreeOne > 0:
+                    lists[i - 1] = "Incorrect Answer"
+            if 481 < centroids[labels][0] < 493:
+                if CounterThreeOne == 0:
+                    lists[i] = "3.1:Strongly DisAgree"
+                    i = i + 1
+                    CounterThreeOne = CounterThreeOne + 1
+                elif CounterThreeOne > 0:
+                    lists[i - 1] = "Incorrect Answer"
+        # -------------------------------------------------------------------------
+        if 512 < centroids[labels][1] < 520:
+            if CounterGender == 0:
+                i = i + 1
+            if CounterTerm == 0:
+                i = i + 1
+            if CounterMajor == 0:
+                i = i + 1
+            if CounterOneOne == 0:
+                i = i + 1
+            if CounterOneTwo == 0:
+                i = i + 1
+            if CounterOneThree == 0:
+                i = i + 1
+            if CounterOneFour == 0:
+                i = i + 1
+            if CounterOneFive == 0:
+                i = i + 1
+            if CounterTwoOne == 0:
+                i = i + 1
+            if CounterTwoTwo == 0:
+                i = i + 1
+            if CounterTwoThree == 0:
+                i = i + 1
+            if CounterTwoFour == 0:
+                i = i + 1
+            if CounterTwoFive == 0:
+                i = i + 1
+            if CounterTwoSix == 0:
+                i = i + 1
+            if CounterThreeOne == 0:
+                i = i + 1
+            if 356 < centroids[labels][0] < 365:
+                if CounterThreeTwo == 0:
+                    lists[i] = "3.2:Strongly Agree"
+                    i = i + 1
+                    CounterThreeTwo = CounterThreeTwo + 1
+            if 386 < centroids[labels][0] < 396:
+                if CounterThreeTwo == 0:
+                    lists[i] = "3.2:Agree"
+                    i = i + 1
+                    CounterThreeTwo = CounterThreeTwo + 1
+                elif CounterThreeTwo > 0:
+                    lists[i - 1] = "Incorrect Answer"
+            if 419 < centroids[labels][0] < 430:
+                if CounterThreeTwo == 0:
+                    lists[i] = "3.2:Natural"
+                    i = i + 1
+                    CounterThreeTwo = CounterThreeTwo + 1
+                elif CounterThreeTwo > 0:
+                    lists[i - 1] = "Incorrect Answer"
+            if 450 < centroids[labels][0] < 462:
+                if CounterThreeTwo == 0:
+                    lists[i] = "3.2:DisAgree"
+                    i = i + 1
+                    CounterThreeTwo = CounterThreeTwo + 1
+                elif CounterThreeTwo > 0:
+                    lists[i - 1] = "Incorrect Answer"
+            if 481 < centroids[labels][0] < 493:
+                if CounterThreeTwo == 0:
+                    lists[i] = "3.2:Strongle DisAgree"
+                    i = i + 1
+                    CounterThreeTwo = CounterThreeTwo + 1
+                elif CounterThreeTwo > 0:
+                    lists[i - 1] = "Incorrect Answer"
+        # -------------------------------------------------------------------------
+        if 525 < centroids[labels][1] < 535:
+            if CounterGender == 0:
+                i = i + 1
+            if CounterTerm == 0:
+                i = i + 1
+            if CounterMajor == 0:
+                i = i + 1
+            if CounterOneOne == 0:
+                i = i + 1
+            if CounterOneTwo == 0:
+                i = i + 1
+            if CounterOneThree == 0:
+                i = i + 1
+            if CounterOneFour == 0:
+                i = i + 1
+            if CounterOneFive == 0:
+                i = i + 1
+            if CounterTwoOne == 0:
+                i = i + 1
+            if CounterTwoTwo == 0:
+                i = i + 1
+            if CounterTwoThree == 0:
+                i = i + 1
+            if CounterTwoFour == 0:
+                i = i + 1
+            if CounterTwoFive == 0:
+                i = i + 1
+            if CounterTwoSix == 0:
+                i = i + 1
+            if CounterThreeOne == 0:
+                i = i + 1
+            if CounterThreeTwo == 0:
+                i = i + 1
+            if 356 < centroids[labels][0] < 365:
+                if CounterThreeThree == 0:
+                    lists[i] = "3.3:Strongly Agree"
+                    i = i + 1
+                    CounterThreeThree = CounterThreeThree + 1
+            if 386 < centroids[labels][0] < 396:
+                if CounterThreeThree == 0:
+                    lists[i] = "3.3:Agree"
+                    i = i + 1
+                    CounterThreeThree = CounterThreeThree + 1
+                elif CounterThreeThree > 0:
+                    lists[i - 1] = "Incorrect Answer"
+            if 419 < centroids[labels][0] < 430:
+                if CounterThreeThree == 0:
+                    lists[i] = "3.3:Natural"
+                    i = i + 1
+                    CounterThreeThree = CounterThreeThree + 1
+                elif CounterThreeThree > 0:
+                    lists[i - 1] = "Incorrect Answer"
+            if 450 < centroids[labels][0] < 462:
+                if CounterThreeThree == 0:
+                    lists[i] = "3.3:DisAgree"
+                    i = i + 1
+                    CounterThreeThree = CounterThreeThree + 1
+                elif CounterThreeThree > 0:
+                    lists[i - 1] = "Incorrect Answer"
+            if 481 < centroids[labels][0] < 493:
+                if CounterThreeThree == 0:
+                    lists[i] = "3.3:Strongly DisAgree"
+                    i = i + 1
+                    CounterThreeThree = CounterThreeThree + 1
+                elif CounterThreeThree > 0:
+                    lists[i - 1] = "Incorrect Answer"
+        # -------------------------------------------------------------------------
+        if 564 < centroids[labels][1] < 572:
+            if CounterGender == 0:
+                i = i + 1
+            if CounterTerm == 0:
+                i = i + 1
+            if CounterMajor == 0:
+                i = i + 1
+            if CounterOneOne == 0:
+                i = i + 1
+            if CounterOneTwo == 0:
+                i = i + 1
+            if CounterOneThree == 0:
+                i = i + 1
+            if CounterOneFour == 0:
+                i = i + 1
+            if CounterOneFive == 0:
+                i = i + 1
+            if CounterTwoOne == 0:
+                i = i + 1
+            if CounterTwoTwo == 0:
+                i = i + 1
+            if CounterTwoThree == 0:
+                i = i + 1
+            if CounterTwoFour == 0:
+                i = i + 1
+            if CounterTwoFive == 0:
+                i = i + 1
+            if CounterTwoSix == 0:
+                i = i + 1
+            if CounterThreeOne == 0:
+                i = i + 1
+            if CounterThreeTwo == 0:
+                i = i + 1
+            if CounterThreeThree == 0:
+                i = i + 1
+            if 356 < centroids[labels][0] < 365:
+                if CounterFourOne == 0:
+                    lists[i] = "4.1:Strongly Agree"
+                    i = i + 1
+                    CounterFourOne = CounterFourOne + 1
+            if 386 < centroids[labels][0] < 396:
+                if CounterFourOne == 0:
+                    lists[i] = "4.1:Agree"
+                    i = i + 1
+                    CounterFourOne = CounterFourOne + 1
+                elif CounterFourOne > 0:
+                    lists[i - 1] = "Incorrect Answer"
+            if 419 < centroids[labels][0] < 430:
+                if CounterFourOne == 0:
+                    lists[i] = "4.1:Natural"
+                    i = i + 1
+                    CounterFourOne = CounterFourOne + 1
+                elif CounterFourOne > 0:
+                    lists[i - 1] = "Incorrect Answer"
+            if 450 < centroids[labels][0] < 462:
+                if CounterFourOne == 0:
+                    lists[i] = "4.1:DisAgree"
+                    i = i + 1
+                    CounterFourOne = CounterFourOne + 1
+                elif CounterFourOne > 0:
+                    lists[i - 1] = "Incorrect Answer"
+            if 481 < centroids[labels][0] < 493:
+                if CounterFourOne == 0:
+                    lists[i] = "4.1:Srongly DisAgree"
+                    i = i + 1
+                    CounterFourOne = CounterFourOne + 1
+                elif CounterFourOne > 0:
+                    lists[i - 1] = "Incorrect Answer"
+        # -------------------------------------------------------------------------
+        if 578 < centroids[labels][1] < 584:
+            if CounterGender == 0:
+                i = i + 1
+            if CounterTerm == 0:
+                i = i + 1
+            if CounterMajor == 0:
+                i = i + 1
+            if CounterOneOne == 0:
+                i = i + 1
+            if CounterOneTwo == 0:
+                i = i + 1
+            if CounterOneThree == 0:
+                i = i + 1
+            if CounterOneFour == 0:
+                i = i + 1
+            if CounterOneFive == 0:
+                i = i + 1
+            if CounterTwoOne == 0:
+                i = i + 1
+            if CounterTwoTwo == 0:
+                i = i + 1
+            if CounterTwoThree == 0:
+                i = i + 1
+            if CounterTwoFour == 0:
+                i = i + 1
+            if CounterTwoFive == 0:
+                i = i + 1
+            if CounterTwoSix == 0:
+                i = i + 1
+            if CounterThreeOne == 0:
+                i = i + 1
+            if CounterThreeTwo == 0:
+                i = i + 1
+            if CounterThreeThree == 0:
+                i = i + 1
+            if CounterFourOne == 0:
+                i = i + 1
+            if 356 < centroids[labels][0] < 365:
+                if CounterFourTwo == 0:
+                    lists[i] = "4.2:Strongly Agree"
+                    i = i + 1
+                    CounterFourTwo = CounterFourTwo + 1
+            if 386 < centroids[labels][0] < 396:
+                if CounterFourTwo == 0:
+                    lists[i] = "4.2:Agree"
+                    i = i + 1
+                    CounterFourTwo = CounterFourTwo + 1
+                elif CounterFourTwo > 0:
+                    lists[i - 1] = "Incorrect Answer"
+            if 419 < centroids[labels][0] < 430:
+                if CounterFourTwo == 0:
+                    lists[i] = "4.2:natural"
+                    i = i + 1
+                    CounterFourTwo = CounterFourTwo + 1
+                elif CounterFourTwo > 0:
+                    lists[i - 1] = "Incorrect Answer"
+            if 450 < centroids[labels][0] < 462:
+                if CounterFourTwo == 0:
+                    lists[i] = "4.2:DisAgree"
+                    i = i + 1
+                    CounterFourTwo = CounterFourTwo + 1
+                elif CounterFourTwo > 0:
+                    lists[i - 1] = "Incorrect Answer"
+            if 481 < centroids[labels][0] < 493:
+                if CounterFourTwo == 0:
+                    lists[i] = "4.2:Strongly DisAgree"
+                    i = i + 1
+                    CounterFourTwo = CounterFourTwo + 1
+                elif CounterFourTwo > 0:
+                    lists[i - 1] = "Incorrect Answer"
+        # -------------------------------------------------------------------------
+        if 602 < centroids[labels][1] < 609:
+            if CounterGender == 0:
+                i = i + 1
+            if CounterTerm == 0:
+                i = i + 1
+            if CounterMajor == 0:
+                i = i + 1
+            if CounterOneOne == 0:
+                i = i + 1
+            if CounterOneTwo == 0:
+                i = i + 1
+            if CounterOneThree == 0:
+                i = i + 1
+            if CounterOneFour == 0:
+                i = i + 1
+            if CounterOneFive == 0:
+                i = i + 1
+            if CounterTwoOne == 0:
+                i = i + 1
+            if CounterTwoTwo == 0:
+                i = i + 1
+            if CounterTwoThree == 0:
+                i = i + 1
+            if CounterTwoFour == 0:
+                i = i + 1
+            if CounterTwoFive == 0:
+                i = i + 1
+            if CounterTwoSix == 0:
+                i = i + 1
+            if CounterThreeOne == 0:
+                i = i + 1
+            if CounterThreeTwo == 0:
+                i = i + 1
+            if CounterThreeThree == 0:
+                i = i + 1
+            if CounterFourOne == 0:
+                i = i + 1
+            if CounterFourTwo == 0:
+                i = i + 1
+            if 356 < centroids[labels][0] < 365:
+                if CounterFourThree == 0:
+                    lists[i] = "4.3:Strongly Agree"
+                    i = i + 1
+                    CounterFourThree = CounterFourThree + 1
+            if 386 < centroids[labels][0] < 396:
+                if CounterFourThree == 0:
+                    lists[i] = "4.3:Agree"
+                    i = i + 1
+                    CounterFourThree = CounterFourThree + 1
+                elif CounterFourThree > 0:
+                    lists[i - 1] = "Incorrect Answer"
+            if 419 < centroids[labels][0] < 430:
+                if CounterFourThree == 0:
+                    lists[i] = "4.3:Natural"
+                    i = i + 1
+                    CounterFourThree = CounterFourThree + 1
+                elif CounterFourThree > 0:
+                    lists[i - 1] = "Incorrect Answer"
+            if 450 < centroids[labels][0] < 462:
+                if CounterFourThree == 0:
+                    lists[i] = "4.3:DisAgree"
+                    i = i + 1
+                    CounterFourThree = CounterFourThree + 1
+                elif CounterFourThree > 0:
+                    lists[i - 1] = "Incorrect Answer"
+            if 481 < centroids[labels][0] < 493:
+                if CounterFourThree == 0:
+                    lists[i] = "4.3:Strongly DisAgree"
+                    i = i + 1
+                    CounterFourThree = CounterFourThree + 1
+                elif CounterFourThree > 0:
+                    lists[i - 1] = "Incorrect Answer"
+        # -------------------------------------------------------------------------
+        if 639 < centroids[labels][1] < 648:
+            if CounterGender == 0:
+                i = i + 1
+            if CounterTerm == 0:
+                i = i + 1
+            if CounterMajor == 0:
+                i = i + 1
+            if CounterOneOne == 0:
+                i = i + 1
+            if CounterOneTwo == 0:
+                i = i + 1
+            if CounterOneThree == 0:
+                i = i + 1
+            if CounterOneFour == 0:
+                i = i + 1
+            if CounterOneFive == 0:
+                i = i + 1
+            if CounterTwoOne == 0:
+                i = i + 1
+            if CounterTwoTwo == 0:
+                i = i + 1
+            if CounterTwoThree == 0:
+                i = i + 1
+            if CounterTwoFour == 0:
+                i = i + 1
+            if CounterTwoFive == 0:
+                i = i + 1
+            if CounterTwoSix == 0:
+                i = i + 1
+            if CounterThreeOne == 0:
+                i = i + 1
+            if CounterThreeTwo == 0:
+                i = i + 1
+            if CounterThreeThree == 0:
+                i = i + 1
+            if CounterFourOne == 0:
+                i = i + 1
+            if CounterFourTwo == 0:
+                i = i + 1
+            if CounterFourThree == 0:
+                i = i + 1
+            if 356 < centroids[labels][0] < 365:
+                if CounterFiveOne == 0:
+                    lists[i] = "5.1:Strongly Agree"
+                    i = i + 1
+                    CounterFiveOne = CounterFiveOne + 1
+            if 386 < centroids[labels][0] < 396:
+                if CounterFiveOne == 0:
+                    lists[i] = "5.1:Agree"
+                    i = i + 1
+                    CounterFiveOne = CounterFiveOne + 1
+                elif CounterFiveOne > 0:
+                    lists[i - 1] = "Incorrect Answer"
+            if 419 < centroids[labels][0] < 430:
+                if CounterFiveOne == 0:
+                    lists[i] = "5.1:Natural"
+                    i = i + 1
+                    CounterFiveOne = CounterFiveOne + 1
+                elif CounterFiveOne > 0:
+                    lists[i - 1] = "Incorrect Answer"
+            if 450 < centroids[labels][0] < 462:
+                if CounterFiveOne == 0:
+                    lists[i] = "5.1:DisAgree"
+                    i = i + 1
+                    CounterFiveOne = CounterFiveOne + 1
+                elif CounterFiveOne > 0:
+                    lists[i - 1] = "Incorrect Answer"
+            if 481 < centroids[labels][0] < 493:
+                if CounterFiveOne == 0:
+                    lists[i] = "5.1:Strongly DisAgree"
+                    i = i + 1
+                    CounterFiveOne = CounterFiveOne + 1
+                elif CounterFiveOne > 0:
+                    lists[i - 1] = "Incorrect Answer"
+        # -------------------------------------------------------------------------
+        if 651 < centroids[labels][1] < 660:
+            if CounterGender == 0:
+                i = i + 1
+            if CounterTerm == 0:
+                i = i + 1
+            if CounterMajor == 0:
+                i = i + 1
+            if CounterOneOne == 0:
+                i = i + 1
+            if CounterOneTwo == 0:
+                i = i + 1
+            if CounterOneThree == 0:
+                i = i + 1
+            if CounterOneFour == 0:
+                i = i + 1
+            if CounterOneFive == 0:
+                i = i + 1
+            if CounterTwoOne == 0:
+                i = i + 1
+            if CounterTwoTwo == 0:
+                i = i + 1
+            if CounterTwoThree == 0:
+                i = i + 1
+            if CounterTwoFour == 0:
+                i = i + 1
+            if CounterTwoFive == 0:
+                i = i + 1
+            if CounterTwoSix == 0:
+                i = i + 1
+            if CounterThreeOne == 0:
+                i = i + 1
+            if CounterThreeTwo == 0:
+                i = i + 1
+            if CounterThreeThree == 0:
+                i = i + 1
+            if CounterFourOne == 0:
+                i = i + 1
+            if CounterFourTwo == 0:
+                i = i + 1
+            if CounterFourThree == 0:
+                i = i + 1
+            if CounterFiveOne == 0:
+                i = i + 1
+            if 356 < centroids[labels][0] < 365:
+                if CounterFiveTwo == 0:
+                    lists[i] = "5.2:Strongly Agree"
+                    i = i + 1
+                    CounterFiveTwo = CounterFiveTwo + 1
+            if 386 < centroids[labels][0] < 396:
+                if CounterFiveTwo == 0:
+                    lists[i] = "5.2:Agree"
+                    i = i + 1
+                    CounterFiveTwo = CounterFiveTwo + 1
+                elif CounterFiveTwo > 0:
+                    lists[i - 1] = "Incorrect Answer"
+            if 419 < centroids[labels][0] < 430:
+                if CounterFiveTwo == 0:
+                    lists[i] = "5.2:Natural"
+                    i = i + 1
+                    CounterFiveTwo = CounterFiveTwo + 1
+                elif CounterFiveTwo > 0:
+                    lists[i - 1] = "Incorrect Answer"
+            if 450 < centroids[labels][0] < 462:
+                if CounterFiveTwo == 0:
+                    lists[i] = "5.2:DisAgree"
+                    i = i + 1
+                    CounterFiveTwo = CounterFiveTwo + 1
+                elif CounterFiveTwo > 0:
+                    lists[i - 1] = "Incorrect Answer"
+            if 481 < centroids[labels][0] < 493:
+                if CounterFiveTwo == 0:
+                    lists[i] = "5.2:Strongly DisAgree"
+                    i = i + 1
+                    CounterFiveTwo = CounterFiveTwo + 1
+                elif CounterFiveTwo > 0:
+                    lists[i - 1] = "Incorrect Answer"
+    f = open("demofile2.txt", "w")
+
+    for ss in range(0, i):
+        f.write(lists[ss] + '\n')
+    f.close()
+
+    # open and read the file after the appending:
+    f = open("demofile2.txt", "r")
+    print(f.read())
+# ----------------Angle is 0-------------------------------------
+if median_angle == 0:
+    ret, result = cv2.threshold(img, 25, 255, cv2.THRESH_BINARY_INV)
+    result = cv2.resize(result, (0, 0), fx=0.4, fy=0.4)
+    cv2.imshow("abc", result)
+    output = cv2.connectedComponentsWithStats(result, connectivity=4)  # apply connected components
+    num_labels = output[0]  # gets the number of connected components
+    centroids = output[3]  # gets the center of each object (connected component)
+    lists = ["Gender Not Answerd","Term Not Answered","Major Not Answred","1.1 Not Answered","1.2 Not Answered","1.3 Not Answered","1.4 Not Answered","1.5 Not Answered","2.1 Not Answered","2.2 Not Answered","2.3 Not Answered","2.4 Not Answered","2.5 Not Answered","2.6 Not Answered","3.1 Not Answered","3.2 Not Answered","3.3 Not Answered","4.1 Not Answered","4.2 Not Answered","4.3 Not Answered","5.1 Not Answered","5.1 Not Answered"]
+    i = 0
+
+    if 102<centroids[2][1]<110:
+        result=cv2.flip(result,-1)
+        cv2.imshow("m3dola", result)
+
+    output = cv2.connectedComponentsWithStats(result, connectivity=4)  # apply connected components
+    num_labels = output[0]  # gets the number of connected components
+    centroids = output[3]  # gets the center of each object (connected component)
+
+    for labels in range(0, num_labels):
+        if 60 < centroids[labels][1] < 105:
+            if 435 < centroids[labels][0] < 460:
+                if CounterGender == 0:
+                    lists[i] = "Gender: Female"
+                    CounterGender = CounterGender+1
+                    i = i + 1
+                elif CounterGender > 0 :
+                    lists[i-1] = "Incorrect Answer"
+            elif 338 < centroids[labels][0] < 425:
+                if CounterGender == 0:
+                    lists[i] = "Gender: Male"
+                    CounterGender = CounterGender + 1
+                    i = i + 1
+
+        if 117 < centroids[labels][1] < 130:
+            if CounterGender == 0:
+                i = i+1
+            if 155 < centroids[labels][0] < 200:
+                if CounterTerm == 0:
+                    lists[i] = "Semester: Fall"
+                    CounterTerm = CounterTerm+1
+                    i = i + 1
+            if 235 < centroids[labels][0] < 290:
+                if CounterTerm == 0:
+                    lists[i] = "Semester: Spring"
+                    CounterTerm = CounterTerm + 1
+                    i = i + 1
+                elif CounterTerm > 0:
+                    lists[i - 1] = "Incorrect Answer"
+            if 100< centroids[labels][1] < 140:
+                if CounterTerm == 0:
+                    lists[i] = "Semester: Summer"
+                    CounterTerm = CounterTerm+1
+                    i = i + 1
+                elif CounterTerm > 0:
+                    lists[i - 1] = "Incorrect Answer"
+# -----------------------------------------------------------------------
+        if 135 < centroids[labels][1] < 147:
+            if CounterGender == 0:
+                i = i + 1
+            if CounterTerm == 0:
+                i = i + 1
+            if 130 < centroids[labels][0] < 160:
+                if CounterMajor == 0:
+                    lists[i] = "Major: MCTA"
+                    i = i + 1
+                    CounterMajor = CounterMajor + 1
+            if 168 < centroids[labels][0] < 205:
+                if CounterMajor == 0:
+                    lists[i] = "Major: EVER"
+                    i = i + 1
+                    CounterMajor = CounterMajor + 1
+                elif CounterMajor > 0:
+                    lists[i - 1] = "Incorrect Answer"
+            if 210 < centroids[labels][0] < 245:
+                if CounterMajor == 0:
+                    lists[i] = "Major: BLDG"
+                    i = i + 1
+                    CounterMajor = CounterMajor + 1
+                elif CounterMajor > 0:
+                    lists[i - 1] = "Incorrect Answer"
+            if 250 < centroids[labels][0] < 290:
+                if CounterMajor == 0:
+                    lists[i] = "Major: CESS"
+                    i = i + 1
+                    CounterMajor = CounterMajor + 1
+                elif CounterMajor > 0:
+                    lists[i - 1] = "Incorrect Answer"
+            if 300 < centroids[labels][0] < 335:
+                if CounterMajor == 0:
+                    lists[i] = "Major: ERGY"
+                    i = i + 1
+                    CounterMajor = CounterMajor + 1
+                elif CounterMajor > 0:
+                    lists[i - 1] = "Incorrect Answer"
+            if 340 < centroids[labels][0] < 375:
+                if CounterMajor == 0:
+                    lists[i] = "Major: COMM"
+                    i = i + 1
+                    CounterMajor = CounterMajor + 1
+                elif CounterMajor > 0:
+                    lists[i - 1] = "Incorrect Answer"
+            if 385 < centroids[labels][0] < 430:
+                if CounterMajor == 0:
+                    lists[i] = "Major: Manf"
+                    i = i + 1
+                    CounterMajor = CounterMajor + 1
+                elif CounterMajor > 0:
+                    lists[i - 1] = "Incorrect Answer"
+        if 151 < centroids[labels][1] < 190:
+            if 130 < centroids[labels][0] < 160:
+                if CounterMajor == 0:
+                    lists[i] = "Major: LARR"
+                    i = i + 1
+                    CounterMajor = CounterMajor + 1
+                elif CounterMajor > 0:
+                    lists[i - 1] = "Incorrect Answer"
+            if 170 < centroids[labels][0] < 205:
+                if CounterMajor == 0:
+                    lists[i] = "Major: MATL"
+                    i = i + 1
+                    CounterMajor = CounterMajor + 1
+                elif CounterMajor > 0:
+                    lists[i - 1] = "Incorrect Answer"
+            if 215 < centroids[labels][0] < 245:
+                if CounterMajor == 0:
+                    lists[i] = "Major: CISE"
+                    i = i + 1
+                    CounterMajor = CounterMajor + 1
+                elif CounterMajor > 0:
+                    lists[i - 1] = "Incorrect Answer"
+            if 250 < centroids[labels][0] < 300:
+                if CounterMajor == 0:
+                    lists[i] = "Major: HAUD"
+                    i = i + 1
+                    CounterMajor = CounterMajor + 1
+                elif CounterMajor > 0:
+                    lists[i - 1] = "Incorrect Answer"
+        # ------------------------------------------------------------
+        if 308 < centroids[labels][1] < 316:
+            if CounterGender == 0:
+                i = i+1
+            if CounterTerm == 0:
+                i = i+1
+            if CounterMajor == 0:
+                i = i + 1
+            if 356 < centroids[labels][0] < 365:
+                if CounterOneOne == 0:
+                    lists[i] = "1.1: Strongly Agree"
+                    CounterOneOne = CounterOneOne + 1
+                    i = i + 1
+            if 386 < centroids[labels][0] < 396:
+                if CounterOneOne == 0:
+                    lists[i] = "1.1:Agree"
+                    i = i + 1
+                    CounterOneOne = CounterOneOne + 1
+                elif CounterOneOne > 0:
+                    lists[i - 1] = "Incorrect Answer"
+            if 419 < centroids[labels][0] < 430:
+                if CounterOneOne == 0:
+                    lists[i] = "1.1:Natural"
+                    i = i + 1
+                    CounterOneOne = CounterOneOne + 1
+                elif CounterOneOne > 0:
+                    lists[i - 1] = "Incorrect Answer"
+            if 450 < centroids[labels][0] < 462:
+                if CounterOneOne == 0:
+                    lists[i] = "1.1:Disagree"
+                    i = i + 1
+                    CounterOneOne = CounterOneOne + 1
+                elif CounterOneOne > 0:
+                    lists[i - 1] = "Incorrect Answer"
+            if 481 < centroids[labels][0] < 493:
+                if CounterOneOne == 0:
+                    lists[i] = "1.1:Strongly Disagree"
+                    i = i + 1
+                    CounterOneOne = CounterOneOne + 1
+                elif CounterOneOne > 0:
+                    lists[i - 1] = "Incorrect Answer"
+        # --------------------------------------------------------
+        if 320 < centroids[labels][1] < 330:
+            if CounterGender == 0:
+                i = i+1
+            if CounterTerm == 0:
+                i = i+1
+            if CounterMajor == 0:
+                i = i + 1
+            if CounterOneOne == 0:
+                i = i + 1
+            if 356 < centroids[labels][0] < 365 :
+                if CounterOneTwo == 0:
+                    lists[i] = "1.2: Strongly Agree"
+                    CounterOneTwo = CounterOneTwo + 1
+                    i = i + 1
+            if 386 < centroids[labels][0] < 396:
+                if CounterOneTwo== 0:
+                    lists[i] = "1.2:Agree"
+                    i = i + 1
+                    CounterOneTwo = CounterOneTwo + 1
+                elif CounterOneTwo> 0:
+                    lists[i - 1] = "Incorrect Answer"
+            if 419 < centroids[labels][0] < 430:
+                if CounterOneTwo == 0:
+                    lists[i] = "1.2:Natural"
+                    i = i + 1
+                    CounterOneTwo = CounterOneTwo + 1
+                elif CounterOneTwo > 0:
+                    lists[i - 1] = "Incorrect Answer"
+            if 450 < centroids[labels][0] < 462:
+                if CounterOneTwo == 0:
+                    lists[i] = "1..2:Disagree"
+                    i = i + 1
+                    CounterOneTwo = CounterOneTwo + 1
+                elif CounterOneTwo > 0:
+                    lists[i - 1] = "Incorrect Answer"
+            if 481 < centroids[labels][0] < 493:
+                if CounterOneTwo == 0:
+                    lists[i] = "1.2:Strongly Disagree"
+                    i = i + 1
+                    CounterOneTwo = CounterOneTwo + 1
+                elif CounterOneTwo > 0:
+                    lists[i - 1] = "Incorrect Answer"
+        # --------------------------------------------------------------------------
+        if 333 < centroids[labels][1] < 342:
+            if CounterGender == 0:
+                i = i+1
+            if CounterTerm == 0:
+                i = i+1
+            if CounterMajor == 0:
+                i = i + 1
+            if CounterOneOne == 0:
+                i = i + 1
+            if CounterOneTwo == 0:
+                i = i + 1
+            if 356 < centroids[labels][0] < 365:
+                if CounterOneThree == 0:
+                    lists[i] = "1.3: Strongly Agree"
+                    CounterOneTwo = CounterOneTwo + 1
+                    i = i + 1
+            if 386 < centroids[labels][0] < 396:
+                if CounterOneThree == 0:
+                    lists[i] = "1.3: Agree"
+                    i = i + 1
+                    CounterOneThree = CounterOneThree + 1
+                elif CounterOneThree > 0:
+                    lists[i - 1] = "Incorrect Answer"
+            if 419 < centroids[labels][0] < 430:
+                if CounterOneThree == 0:
+                    lists[i] = "1.3: Natural"
+                    i = i + 1
+                    CounterOneThree = CounterOneThree + 1
+                elif CounterOneThree > 0:
+                    lists[i - 1] = "Incorrect Answer"
+            if 450 < centroids[labels][0] < 462:
+                if CounterOneThree == 0:
+                    lists[i] = "1.3: DisAgree"
+                    i = i + 1
+                    CounterOneThree = CounterOneThree + 1
+                elif CounterOneThree > 0:
+                    lists[i - 1] = "Incorrect Answer"
+            if 481 < centroids[labels][0] < 493:
+                if CounterOneThree == 0:
+                    lists[i] = "1.3:Strongly DisAgree"
+                    i = i + 1
+                    CounterOneThree = CounterOneThree + 1
+                elif CounterOneThree > 0:
+                    lists[i - 1] = "Incorrect Answer"
+        # -------------------------------------------------------------------
+        if 348 < centroids[labels][1] < 354:
+            if CounterGender == 0:
+                i = i+1
+            if CounterTerm == 0:
+                i = i+1
+            if CounterMajor == 0:
+                i = i + 1
+            if CounterOneOne == 0:
+                i = i + 1
+            if CounterOneTwo == 0:
+                i = i + 1
+            if CounterOneThree == 0:
+                i = i + 1
+            if 356 < centroids[labels][0] < 365:
+                if CounterOneFour == 0:
+                    lists[i] = "1.4: Strongly Agree"
+                    i = i + 1
+                    CounterOneFour = CounterOneFour + 1
+            if 386 < centroids[labels][0] < 396:
+                if CounterOneFour == 0:
+                    lists[i] = "1.4: Agree"
+                    i = i + 1
+                    CounterOneFour = CounterOneFour + 1
+                elif CounterOneFour > 0:
+                    lists[i - 1] = "Incorrect Answer"
+            if 419 < centroids[labels][0] < 430:
+                if CounterOneFour == 0:
+                    lists[i] = "1.4: Natural"
+                    i = i + 1
+                    CounterOneFour = CounterOneFour + 1
+                elif CounterOneFour > 0:
+                    lists[i - 1] = "Incorrect Answer"
+            if 450 < centroids[labels][0] < 462:
+                if CounterOneFour == 0:
+                    lists[i] = "1.4: DisAgree"
+                    i = i + 1
+                    CounterOneFour = CounterOneFour + 1
+                elif CounterOneFour > 0:
+                    lists[i - 1] = "Incorrect Answer"
+            if 481 < centroids[labels][0] < 493 :
+                if CounterOneFour == 0:
+                    lists[i] = "1.4:Strongly DisAgree"
+                    i = i + 1
+                    CounterOneFour = CounterOneFour + 1
+                elif CounterOneFour > 0:
+                    lists[i - 1] = "Incorrect Answer"
+        # -----------------------------------------------------------------------
+        if 359 < centroids[labels][1] < 367:
+            if CounterGender == 0:
+                i = i+1
+            if CounterTerm == 0:
+                i = i+1
+            if CounterMajor == 0:
+                i = i + 1
+            if CounterOneOne == 0:
+                i = i + 1
+            if CounterOneTwo == 0:
+                i = i + 1
+            if CounterOneThree == 0:
+                i = i + 1
+            if CounterOneFour == 0:
+                i = i + 1
+            if 356 < centroids[labels][0] < 365:
+                if CounterOneFive == 0:
+                    lists[i] = "1.5:Strongly Agree"
+                    i = i + 1
+                    CounterOneFive = CounterOneFive + 1
+            if 386 < centroids[labels][0] < 396:
+                if CounterOneFive == 0:
+                    lists[i] = "1.5:Agree"
+                    i = i + 1
+                    CounterOneFive = CounterOneFive + 1
+                elif CounterOneFive > 0:
+                    lists[i - 1] = "Incorrect Answer"
+            if 419 < centroids[labels][0] < 430:
+                if CounterOneFive == 0:
+                    lists[i] = "1.5:Natural"
+                    i = i + 1
+                    CounterOneFive = CounterOneFive + 1
+                elif CounterOneFive > 0:
+                    lists[i - 1] = "Incorrect Answer"
+            if 450 < centroids[labels][0] < 462:
+                if CounterOneFive == 0:
+                    lists[i] = "1.5:DisAgree"
+                    i = i + 1
+                    CounterOneFive = CounterOneFive + 1
+                elif CounterOneFive > 0:
+                    lists[i - 1] = "Incorrect Answer"
+            if 481 < centroids[labels][0] < 493:
+                if CounterOneFive == 0:
+                    lists[i] = "1.5:Strongly DisAgree"
+                    i = i + 1
+                    CounterOneFive = CounterOneFive + 1
+                elif CounterOneFive > 0:
+                    lists[i - 1] = "Incorrect Answer"
+        # ------------------------------------------------------------------------
+        if 398 < centroids[labels][1] < 406:
+            if CounterGender == 0:
+                i = i + 1
+            if CounterTerm == 0:
+                i = i + 1
+            if CounterMajor == 0:
+                i = i + 1
+            if CounterOneOne == 0:
+                i = i + 1
+            if CounterOneTwo == 0:
+                i = i + 1
+            if CounterOneThree == 0:
+                i = i + 1
+            if CounterOneFour == 0:
+                i = i + 1
+            if CounterOneFive == 0:
+                i = i + 1
+            if 356 < centroids[labels][0] < 365:
+                if CounterTwoOne == 0:
+                    lists[i] = "2.1:Strongly Agree"
+                    i = i + 1
+                    CounterTwoOne = CounterTwoOne + 1
+            if 386 < centroids[labels][0] < 396:
+                if CounterTwoOne == 0:
+                    lists[i] = "2.1:Agree"
+                    i = i + 1
+                    CounterTwoOne = CounterTwoOne + 1
+                elif CounterTwoOne > 0:
+                    lists[i - 1] = "Incorrect Answer"
+            if 419 < centroids[labels][0] < 430:
+                if CounterTwoOne == 0:
+                    lists[i] = "2.1:Natural"
+                    i = i + 1
+                    CounterTwoOne = CounterTwoOne + 1
+                elif CounterTwoOne > 0:
+                    lists[i - 1] = "Incorrect Answer"
+            if 450 < centroids[labels][0] < 462:
+                if CounterTwoOne == 0:
+                    lists[i] = "2.1:DisAgree"
+                    i = i + 1
+                    CounterTwoOne = CounterTwoOne + 1
+                elif CounterTwoOne > 0:
+                    lists[i - 1] = "Incorrect Answer"
+            if 481 < centroids[labels][0] < 493:
+                if CounterTwoOne == 0:
+                    lists[i] = "2.1:Stongly DisAgree"
+                    i = i + 1
+                    CounterTwoOne = CounterTwoOne + 1
+                elif CounterTwoOne > 0:
+                    lists[i - 1] = "Incorrect Answer"
+        # ---------------------------------------------------------------------------
+        if 411 < centroids[labels][1] < 418:
+            if CounterGender == 0:
+                i = i + 1
+            if CounterTerm == 0:
+                i = i + 1
+            if CounterMajor == 0:
+                i = i + 1
+            if CounterOneOne == 0:
+                i = i + 1
+            if CounterOneTwo == 0:
+                i = i + 1
+            if CounterOneThree == 0:
+                i = i + 1
+            if CounterOneFour == 0:
+                i = i + 1
+            if CounterOneFive == 0:
+                i = i + 1
+            if CounterTwoOne == 0:
+                i = i + 1
+            if 356 < centroids[labels][0] < 365:
+                if CounterTwoTwo == 0:
+                    lists[i] = "2.2:Strongly Agree"
+                    i = i + 1
+                    CounterTwoTwo = CounterTwoTwo + 1
+            if 386 < centroids[labels][0] < 396:
+                if CounterTwoTwo == 0:
+                    lists[i] = "2.2:Agree"
+                    i = i + 1
+                    CounterTwoTwo = CounterTwoTwo + 1
+                elif CounterTwoTwo > 0:
+                    lists[i - 1] = "Incorrect Answer"
+            if 419 < centroids[labels][0] < 430:
+                if CounterTwoTwo == 0:
+                    lists[i] = "2.2:Natural"
+                    i = i + 1
+                    CounterTwoTwo = CounterTwoTwo + 1
+                elif CounterTwoTwo > 0:
+                    lists[i - 1] = "Incorrect Answer"
+            if 450 < centroids[labels][0] < 462:
+                if CounterTwoTwo == 0:
+                    lists[i] = "2.2:DisAgree"
+                    i = i + 1
+                    CounterTwoTwo = CounterTwoTwo + 1
+                elif CounterTwoTwo > 0:
+                    lists[i - 1] = "Incorrect Answer"
+            if 481 < centroids[labels][0] < 493:
+                if CounterTwoTwo == 0:
+                    lists[i] = "2.2:Strongly DisAgree"
+                    i = i + 1
+                    CounterTwoTwo = CounterTwoTwo + 1
+                elif CounterTwoTwo > 0:
+                    lists[i - 1] = "Incorrect Answer"
+        # -----------------------------------------------------------------------
+        if 424 < centroids[labels][1] < 431:
+            if CounterGender == 0:
+                i = i + 1
+            if CounterTerm == 0:
+                i = i + 1
+            if CounterMajor == 0:
+                i = i + 1
+            if CounterOneOne == 0:
+                i = i + 1
+            if CounterOneTwo == 0:
+                i = i + 1
+            if CounterOneThree == 0:
+                i = i + 1
+            if CounterOneFour == 0:
+                i = i + 1
+            if CounterOneFive == 0:
+                i = i + 1
+            if CounterTwoOne == 0:
+                i = i + 1
+            if CounterTwoTwo == 0:
+                i = i + 1
+            if 356 < centroids[labels][0] < 365:
+                if CounterTwoThree == 0:
+                    lists[i] = "2.3:Strongly Agree"
+                    i = i + 1
+                    CounterTwoThree = CounterTwoThree + 1
+            if 386 < centroids[labels][0] < 396:
+                if CounterTwoThree == 0:
+                    lists[i] = "2.3:Agree"
+                    i = i + 1
+                    CounterTwoThree = CounterTwoThree + 1
+                elif CounterTwoThree > 0:
+                    lists[i - 1] = "Incorrect Answer"
+            if 419 < centroids[labels][0] < 430:
+                if CounterTwoThree == 0:
+                    lists[i] = "2.3:Natural"
+                    i = i + 1
+                    CounterTwoThree = CounterTwoThree + 1
+                elif CounterTwoThree > 0:
+                    lists[i - 1] = "Incorrect Answer"
+            if 450 < centroids[labels][0] < 462:
+                if CounterTwoThree == 0:
+                    lists[i] = "2.3:DisAgree"
+                    i = i + 1
+                    CounterTwoThree = CounterTwoThree + 1
+                elif CounterTwoThree > 0:
+                    lists[i - 1] = "Incorrect Answer"
+            if 481 < centroids[labels][0] < 493:
+                if CounterTwoThree == 0:
+                    lists[i] = "2.3:Strongle DisAgree"
+                    i = i + 1
+                    CounterTwoThree = CounterTwoThree + 1
+                elif CounterTwoThree > 0:
+                    lists[i - 1] = "Incorrect Answer"
+        # -------------------------------------------------------------------------
+        if 437 < centroids[labels][1] < 443:
+            if CounterGender == 0:
+                i = i + 1
+            if CounterTerm == 0:
+                i = i + 1
+            if CounterMajor == 0:
+                i = i + 1
+            if CounterOneOne == 0:
+                i = i + 1
+            if CounterOneTwo == 0:
+                i = i + 1
+            if CounterOneThree == 0:
+                i = i + 1
+            if CounterOneFour == 0:
+                i = i + 1
+            if CounterOneFive == 0:
+                i = i + 1
+            if CounterTwoOne == 0:
+                i = i + 1
+            if CounterTwoTwo == 0:
+                i = i + 1
+            if CounterTwoThree == 0:
+                i = i + 1
+            if 356 < centroids[labels][0] < 365:
+                if CounterTwoFour == 0:
+                    lists[i] = "2.4:Strongly Agree"
+                    i = i + 1
+                    CounterTwoFour = CounterTwoFour + 1
+            if 386 < centroids[labels][0] < 396:
+                if CounterTwoFour == 0:
+                    lists[i] = "2.4:Agree"
+                    i = i + 1
+                    CounterTwoFour = CounterTwoFour + 1
+                elif CounterTwoFour > 0:
+                    lists[i - 1] = "Incorrect Answer"
+            if 419 < centroids[labels][0] < 430:
+                if CounterTwoFour == 0:
+                    lists[i] = "2.4:Natural"
+                    i = i + 1
+                    CounterTwoFour = CounterTwoFour + 1
+                elif CounterTwoFour > 0:
+                    lists[i - 1] = "Incorrect Answer"
+            if 450 < centroids[labels][0] < 462:
+                if CounterTwoFour == 0:
+                    lists[i] = "2.4:DisAgree"
+                    i = i + 1
+                    CounterTwoFour = CounterTwoFour + 1
+                elif CounterTwoFour > 0:
+                    lists[i - 1] = "Incorrect Answer"
+            if 481 < centroids[labels][0] < 493:
+                if CounterTwoFour == 0:
+                    lists[i] = "2.4:Strongly DisAgree"
+                    i = i + 1
+                    CounterTwoFour = CounterTwoFour + 1
+                elif CounterTwoFour > 0:
+                    lists[i - 1] = "Incorrect Answer"
+        # -------------------------------------------------------------------------
+        if 449 < centroids[labels][1] < 455:
+            if CounterGender == 0:
+                i = i + 1
+            if CounterTerm == 0:
+                i = i + 1
+            if CounterMajor == 0:
+                i = i + 1
+            if CounterOneOne == 0:
+                i = i + 1
+            if CounterOneTwo == 0:
+                i = i + 1
+            if CounterOneThree == 0:
+                i = i + 1
+            if CounterOneFour == 0:
+                i = i + 1
+            if CounterOneFive == 0:
+                i = i + 1
+            if CounterTwoOne == 0:
+                i = i + 1
+            if CounterTwoTwo == 0:
+                i = i + 1
+            if CounterTwoThree == 0:
+                i = i + 1
+            if CounterTwoFour == 0:
+                i = i + 1
+            if 356 < centroids[labels][0] < 365:
+                if CounterTwoFive == 0:
+                    lists[i] = "2.5:Strongly Agree"
+                    i = i + 1
+                    CounterTwoFive = CounterTwoFive + 1
+            if 386 < centroids[labels][0] < 396:
+                if CounterTwoFive == 0:
+                    lists[i] = "2.5:Agree"
+                    i = i + 1
+                    CounterTwoFive = CounterTwoFive + 1
+                elif CounterTwoFive > 0:
+                    lists[i - 1] = "Incorrect Answer"
+            if 419 < centroids[labels][0] < 430:
+                if CounterTwoFive == 0:
+                    lists[i] = "2.5:Natural"
+                    i = i + 1
+                    CounterTwoFive = CounterTwoFive + 1
+                elif CounterTwoFive > 0:
+                    lists[i - 1] = "Incorrect Answer"
+            if 450 < centroids[labels][0] < 462 :
+                if CounterTwoFive == 0:
+                    lists[i] = "2.5:DisAgree"
+                    i = i + 1
+                    CounterTwoFive = CounterTwoFive + 1
+                elif CounterTwoFive > 0:
+                    lists[i - 1] = "Incorrect Answer"
+            if 481 < centroids[labels][0] < 493:
+                if CounterTwoFive == 0:
+                    lists[i] = "2.5:Strongly DisAgree"
+                    i = i + 1
+                    CounterTwoFive = CounterTwoFive + 1
+                elif CounterTwoFive > 0:
+                    lists[i - 1] = "Incorrect Answer"
+        # -------------------------------------------------------------------------
+        if 461 < centroids[labels][1] < 470:
+            if CounterGender == 0:
+                i = i + 1
+            if CounterTerm == 0:
+                i = i + 1
+            if CounterMajor == 0:
+                i = i + 1
+            if CounterOneOne == 0:
+                i = i + 1
+            if CounterOneTwo == 0:
+                i = i + 1
+            if CounterOneThree == 0:
+                i = i + 1
+            if CounterOneFour == 0:
+                i = i + 1
+            if CounterOneFive == 0:
+                i = i + 1
+            if CounterTwoOne == 0:
+                i = i + 1
+            if CounterTwoTwo == 0:
+                i = i + 1
+            if CounterTwoThree == 0:
+                i = i + 1
+            if CounterTwoFour == 0:
+                i = i + 1
+            if CounterTwoFive == 0:
+                i = i + 1
+            if 356 < centroids[labels][0] < 365:
+                if CounterTwoSix == 0:
+                    lists[i] = "2.6:Strongly Agree"
+                    i = i + 1
+                    CounterTwoSix = CounterTwoSix + 1
+            if 386 < centroids[labels][0] < 396:
+                if CounterTwoSix == 0:
+                    lists[i] = "2.6:Agree"
+                    i = i + 1
+                    CounterTwoSix = CounterTwoSix + 1
+                elif CounterTwoSix > 0:
+                    lists[i - 1] = "Incorrect Answer"
+            if 419 < centroids[labels][0] < 430:
+                if CounterTwoSix == 0:
+                    lists[i] = "2.6:Natural"
+                    i = i + 1
+                    CounterTwoSix = CounterTwoSix + 1
+                elif CounterTwoSix > 0:
+                    lists[i - 1] = "Incorrect Answer"
+            if 450 < centroids[labels][0] < 462:
+                if CounterTwoSix == 0:
+                    lists[i] = "2.6:DisAgree"
+                    i = i + 1
+                    CounterTwoSix = CounterTwoSix + 1
+                elif CounterTwoSix > 0:
+                    lists[i - 1] = "Incorrect Answer"
+            if 481 < centroids[labels][0] < 493:
+                if CounterTwoSix == 0:
+                    lists[i] = "2.6:Strongly DisAgree"
+                    i = i + 1
+                    CounterTwoSix = CounterTwoSix + 1
+                elif CounterTwoSix > 0:
+                    lists[i - 1] = "Incorrect Answer"
+        # -------------------------------------------------------------------------
+        if 500 < centroids[labels][1] < 507:
+            if CounterGender == 0:
+                i = i + 1
+            if CounterTerm == 0:
+                i = i + 1
+            if CounterMajor == 0:
+                i = i + 1
+            if CounterOneOne == 0:
+                i = i + 1
+            if CounterOneTwo == 0:
+                i = i + 1
+            if CounterOneThree == 0:
+                i = i + 1
+            if CounterOneFour == 0:
+                i = i + 1
+            if CounterOneFive == 0:
+                i = i + 1
+            if CounterTwoOne == 0:
+                i = i + 1
+            if CounterTwoTwo == 0:
+                i = i + 1
+            if CounterTwoThree == 0:
+                i = i + 1
+            if CounterTwoFour == 0:
+                i = i + 1
+            if CounterTwoFive == 0:
+                i = i + 1
+            if CounterTwoSix == 0:
+                i = i + 1
+            if 356 < centroids[labels][0] < 365:
+                if CounterThreeOne == 0:
+                    lists[i] = "3.1:Strongly Agree"
+                    i = i + 1
+                    CounterThreeOne = CounterThreeOne + 1
+            if 386 < centroids[labels][0] < 396:
+                if CounterThreeOne == 0:
+                    lists[i] = "3.1:Agree"
+                    i = i + 1
+                    CounterThreeOne = CounterThreeOne + 1
+                elif CounterThreeOne > 0:
+                    lists[i - 1] = "Incorrect Answer"
+            if 419 < centroids[labels][0] < 430:
+                if CounterThreeOne == 0:
+                    lists[i] = "3.1:Natural"
+                    i = i + 1
+                    CounterThreeOne = CounterThreeOne + 1
+                elif CounterThreeOne > 0:
+                    lists[i - 1] = "Incorrect Answer"
+            if 450 < centroids[labels][0] < 462 :
+                if CounterThreeOne == 0:
+                    lists[i] = "3.1:DisAgree"
+                    i = i + 1
+                    CounterThreeOne = CounterThreeOne + 1
+                elif CounterThreeOne > 0:
+                    lists[i - 1] = "Incorrect Answer"
+            if 481 < centroids[labels][0] < 493:
+                if CounterThreeOne == 0:
+                    lists[i] = "3.1:Strongly DisAgree"
+                    i = i + 1
+                    CounterThreeOne = CounterThreeOne + 1
+                elif CounterThreeOne > 0:
+                    lists[i - 1] = "Incorrect Answer"
+        # -------------------------------------------------------------------------
+        if 512 < centroids[labels][1] < 520:
+            if CounterGender == 0:
+                i = i + 1
+            if CounterTerm == 0:
+                i = i + 1
+            if CounterMajor == 0:
+                i = i + 1
+            if CounterOneOne == 0:
+                i = i + 1
+            if CounterOneTwo == 0:
+                i = i + 1
+            if CounterOneThree == 0:
+                i = i + 1
+            if CounterOneFour == 0:
+                i = i + 1
+            if CounterOneFive == 0:
+                i = i + 1
+            if CounterTwoOne == 0:
+                i = i + 1
+            if CounterTwoTwo == 0:
+                i = i + 1
+            if CounterTwoThree == 0:
+                i = i + 1
+            if CounterTwoFour == 0:
+                i = i + 1
+            if CounterTwoFive == 0:
+                i = i + 1
+            if CounterTwoSix == 0:
+                i = i + 1
+            if CounterThreeOne == 0:
+                i = i + 1
+            if 356 < centroids[labels][0] < 365:
+                if CounterThreeTwo == 0:
+                    lists[i] = "3.2:Strongly Agree"
+                    i = i + 1
+                    CounterThreeTwo = CounterThreeTwo + 1
+            if 386 < centroids[labels][0] < 396:
+                if CounterThreeTwo == 0:
+                    lists[i] = "3.2:Agree"
+                    i = i + 1
+                    CounterThreeTwo = CounterThreeTwo + 1
+                elif CounterThreeTwo > 0:
+                    lists[i - 1] = "Incorrect Answer"
+            if 419 < centroids[labels][0] < 430:
+                if CounterThreeTwo == 0:
+                    lists[i] = "3.2:Natural"
+                    i = i + 1
+                    CounterThreeTwo = CounterThreeTwo + 1
+                elif CounterThreeTwo > 0:
+                    lists[i - 1] = "Incorrect Answer"
+            if 450 < centroids[labels][0] < 462:
+                if CounterThreeTwo == 0:
+                    lists[i] = "3.2:DisAgree"
+                    i = i + 1
+                    CounterThreeTwo = CounterThreeTwo + 1
+                elif CounterThreeTwo > 0:
+                    lists[i - 1] = "Incorrect Answer"
+            if 481 < centroids[labels][0] < 493:
+                if CounterThreeTwo == 0:
+                    lists[i] = "3.2:Strongle DisAgree"
+                    i = i + 1
+                    CounterThreeTwo = CounterThreeTwo + 1
+                elif CounterThreeTwo > 0:
+                    lists[i - 1] = "Incorrect Answer"
+        # -------------------------------------------------------------------------
+        if 525 < centroids[labels][1] < 535:
+            if CounterGender == 0:
+                i = i + 1
+            if CounterTerm == 0:
+                i = i + 1
+            if CounterMajor == 0:
+                i = i + 1
+            if CounterOneOne == 0:
+                i = i + 1
+            if CounterOneTwo == 0:
+                i = i + 1
+            if CounterOneThree == 0:
+                i = i + 1
+            if CounterOneFour == 0:
+                i = i + 1
+            if CounterOneFive == 0:
+                i = i + 1
+            if CounterTwoOne == 0:
+                i = i + 1
+            if CounterTwoTwo == 0:
+                i = i + 1
+            if CounterTwoThree == 0:
+                i = i + 1
+            if CounterTwoFour == 0:
+                i = i + 1
+            if CounterTwoFive == 0:
+                i = i + 1
+            if CounterTwoSix == 0:
+                i = i + 1
+            if CounterThreeOne == 0:
+                i = i + 1
+            if CounterThreeTwo == 0:
+                i = i + 1
+            if 356 < centroids[labels][0] < 365:
+                if CounterThreeThree == 0:
+                    lists[i] = "3.3:Strongly Agree"
+                    i = i + 1
+                    CounterThreeThree = CounterThreeThree + 1
+            if 386 < centroids[labels][0] < 396:
+                if CounterThreeThree == 0:
+                    lists[i] = "3.3:Agree"
+                    i = i + 1
+                    CounterThreeThree = CounterThreeThree + 1
+                elif CounterThreeThree > 0:
+                    lists[i - 1] = "Incorrect Answer"
+            if 419 < centroids[labels][0] < 430:
+                if CounterThreeThree == 0:
+                    lists[i] = "3.3:Natural"
+                    i = i + 1
+                    CounterThreeThree = CounterThreeThree + 1
+                elif CounterThreeThree > 0:
+                    lists[i - 1] = "Incorrect Answer"
+            if 450 < centroids[labels][0] < 462:
+                if CounterThreeThree == 0:
+                    lists[i] = "3.3:DisAgree"
+                    i = i + 1
+                    CounterThreeThree = CounterThreeThree + 1
+                elif CounterThreeThree > 0:
+                    lists[i - 1] = "Incorrect Answer"
+            if 481 < centroids[labels][0] < 493:
+                if CounterThreeThree == 0:
+                    lists[i] = "3.3:Strongly DisAgree"
+                    i = i + 1
+                    CounterThreeThree = CounterThreeThree + 1
+                elif CounterThreeThree > 0:
+                    lists[i - 1] = "Incorrect Answer"
+        # -------------------------------------------------------------------------
+        if 564 < centroids[labels][1] < 572:
+            if CounterGender == 0:
+                i = i + 1
+            if CounterTerm == 0:
+                i = i + 1
+            if CounterMajor == 0:
+                i = i + 1
+            if CounterOneOne == 0:
+                i = i + 1
+            if CounterOneTwo == 0:
+                i = i + 1
+            if CounterOneThree == 0:
+                i = i + 1
+            if CounterOneFour == 0:
+                i = i + 1
+            if CounterOneFive == 0:
+                i = i + 1
+            if CounterTwoOne == 0:
+                i = i + 1
+            if CounterTwoTwo == 0:
+                i = i + 1
+            if CounterTwoThree == 0:
+                i = i + 1
+            if CounterTwoFour == 0:
+                i = i + 1
+            if CounterTwoFive == 0:
+                i = i + 1
+            if CounterTwoSix == 0:
+                i = i + 1
+            if CounterThreeOne == 0:
+                i = i + 1
+            if CounterThreeTwo == 0:
+                i = i + 1
+            if CounterThreeThree == 0:
+                i = i + 1
+            if 356 < centroids[labels][0] < 365:
+                if CounterFourOne == 0:
+                    lists[i] = "4.1:Strongly Agree"
+                    i = i + 1
+                    CounterFourOne = CounterFourOne+ 1
+            if 386 < centroids[labels][0] < 396:
+                if CounterFourOne == 0:
+                    lists[i] = "4.1:Agree"
+                    i = i + 1
+                    CounterFourOne = CounterFourOne + 1
+                elif CounterFourOne > 0:
+                    lists[i - 1] = "Incorrect Answer"
+            if 419 < centroids[labels][0] < 430:
+                if CounterFourOne == 0:
+                    lists[i] = "4.1:Natural"
+                    i = i + 1
+                    CounterFourOne = CounterFourOne + 1
+                elif CounterFourOne > 0:
+                    lists[i - 1] = "Incorrect Answer"
+            if 450 < centroids[labels][0] < 462:
+                if CounterFourOne == 0:
+                    lists[i] = "4.1:DisAgree"
+                    i = i + 1
+                    CounterFourOne = CounterFourOne + 1
+                elif CounterFourOne > 0:
+                    lists[i - 1] = "Incorrect Answer"
+            if 481 < centroids[labels][0] < 493:
+                if CounterFourOne == 0:
+                    lists[i] = "4.1:Srongly DisAgree"
+                    i = i + 1
+                    CounterFourOne = CounterFourOne + 1
+                elif CounterFourOne > 0:
+                    lists[i - 1] = "Incorrect Answer"
+        # -------------------------------------------------------------------------
+        if 578 < centroids[labels][1] < 584:
+            if CounterGender == 0:
+                i = i + 1
+            if CounterTerm == 0:
+                i = i + 1
+            if CounterMajor == 0:
+                i = i + 1
+            if CounterOneOne == 0:
+                i = i + 1
+            if CounterOneTwo == 0:
+                i = i + 1
+            if CounterOneThree == 0:
+                i = i + 1
+            if CounterOneFour == 0:
+                i = i + 1
+            if CounterOneFive == 0:
+                i = i + 1
+            if CounterTwoOne == 0:
+                i = i + 1
+            if CounterTwoTwo == 0:
+                i = i + 1
+            if CounterTwoThree == 0:
+                i = i + 1
+            if CounterTwoFour == 0:
+                i = i + 1
+            if CounterTwoFive == 0:
+                i = i + 1
+            if CounterTwoSix == 0:
+                i = i + 1
+            if CounterThreeOne == 0:
+                i = i + 1
+            if CounterThreeTwo == 0:
+                i = i + 1
+            if CounterThreeThree == 0:
+                i = i + 1
+            if CounterFourOne == 0:
+                i = i + 1
+            if 356 < centroids[labels][0] < 365:
+                if CounterFourTwo == 0:
+                    lists[i] = "4.2:Strongly Agree"
+                    i = i + 1
+                    CounterFourTwo = CounterFourTwo + 1
+            if 386 < centroids[labels][0] < 396:
+                if CounterFourTwo == 0:
+                    lists[i] = "4.2:Agree"
+                    i = i + 1
+                    CounterFourTwo = CounterFourTwo + 1
+                elif CounterFourTwo > 0:
+                    lists[i - 1] = "Incorrect Answer"
+            if 419 < centroids[labels][0] < 430 :
+                if CounterFourTwo == 0:
+                    lists[i] = "4.2:natural"
+                    i = i + 1
+                    CounterFourTwo = CounterFourTwo + 1
+                elif CounterFourTwo > 0:
+                    lists[i - 1] = "Incorrect Answer"
+            if 450 < centroids[labels][0] < 462:
+                if CounterFourTwo == 0:
+                    lists[i] = "4.2:DisAgree"
+                    i = i + 1
+                    CounterFourTwo = CounterFourTwo + 1
+                elif CounterFourTwo > 0:
+                    lists[i - 1] = "Incorrect Answer"
+            if 481 < centroids[labels][0] < 493:
+                if CounterFourTwo == 0:
+                    lists[i] = "4.2:Strongly DisAgree"
+                    i = i + 1
+                    CounterFourTwo = CounterFourTwo + 1
+                elif CounterFourTwo > 0:
+                    lists[i - 1] = "Incorrect Answer"
+        # -------------------------------------------------------------------------
+        if 602 < centroids[labels][1] < 609:
+            if CounterGender == 0:
+                i = i + 1
+            if CounterTerm == 0:
+                i = i + 1
+            if CounterMajor == 0:
+                i = i + 1
+            if CounterOneOne == 0:
+                i = i + 1
+            if CounterOneTwo == 0:
+                i = i + 1
+            if CounterOneThree == 0:
+                i = i + 1
+            if CounterOneFour == 0:
+                i = i + 1
+            if CounterOneFive == 0:
+                i = i + 1
+            if CounterTwoOne == 0:
+                i = i + 1
+            if CounterTwoTwo == 0:
+                i = i + 1
+            if CounterTwoThree == 0:
+                i = i + 1
+            if CounterTwoFour == 0:
+                i = i + 1
+            if CounterTwoFive == 0:
+                i = i + 1
+            if CounterTwoSix == 0:
+                i = i + 1
+            if CounterThreeOne == 0:
+                i = i + 1
+            if CounterThreeTwo == 0:
+                i = i + 1
+            if CounterThreeThree == 0:
+                i = i + 1
+            if CounterFourOne == 0:
+                i = i + 1
+            if CounterFourTwo == 0:
+                i = i + 1
+            if 356 < centroids[labels][0] < 365:
+                if CounterFourThree == 0:
+                    lists[i] = "4.3:Strongly Agree"
+                    i = i + 1
+                    CounterFourThree = CounterFourThree + 1
+            if 386 < centroids[labels][0] < 396:
+                if CounterFourThree == 0:
+                    lists[i] = "4.3:Agree"
+                    i = i + 1
+                    CounterFourThree = CounterFourThree + 1
+                elif CounterFourThree > 0:
+                    lists[i - 1] = "Incorrect Answer"
+            if 419 < centroids[labels][0] < 430:
+                if CounterFourThree == 0:
+                    lists[i] = "4.3:Natural"
+                    i = i + 1
+                    CounterFourThree = CounterFourThree + 1
+                elif CounterFourThree > 0:
+                    lists[i - 1] = "Incorrect Answer"
+            if 450 < centroids[labels][0] < 462:
+                if CounterFourThree == 0:
+                    lists[i] = "4.3:DisAgree"
+                    i = i + 1
+                    CounterFourThree = CounterFourThree + 1
+                elif CounterFourThree > 0:
+                    lists[i - 1] = "Incorrect Answer"
+            if 481 < centroids[labels][0] < 493:
+                if CounterFourThree == 0:
+                    lists[i] = "4.3:Strongly DisAgree"
+                    i = i + 1
+                    CounterFourThree = CounterFourThree + 1
+                elif CounterFourThree > 0:
+                    lists[i - 1] = "Incorrect Answer"
+        # -------------------------------------------------------------------------
+        if 639 < centroids[labels][1] < 648:
+            if CounterGender == 0:
+                i = i + 1
+            if CounterTerm == 0:
+                i = i + 1
+            if CounterMajor == 0:
+                i = i + 1
+            if CounterOneOne == 0:
+                i = i + 1
+            if CounterOneTwo == 0:
+                i = i + 1
+            if CounterOneThree == 0:
+                i = i + 1
+            if CounterOneFour == 0:
+                i = i + 1
+            if CounterOneFive == 0:
+                i = i + 1
+            if CounterTwoOne == 0:
+                i = i + 1
+            if CounterTwoTwo == 0:
+                i = i + 1
+            if CounterTwoThree == 0:
+                i = i + 1
+            if CounterTwoFour == 0:
+                i = i + 1
+            if CounterTwoFive == 0:
+                i = i + 1
+            if CounterTwoSix == 0:
+                i = i + 1
+            if CounterThreeOne == 0:
+                i = i + 1
+            if CounterThreeTwo == 0:
+                i = i + 1
+            if CounterThreeThree == 0:
+                i = i + 1
+            if CounterFourOne == 0:
+                i = i + 1
+            if CounterFourTwo == 0:
+                i = i + 1
+            if CounterFourThree == 0:
+                i = i + 1
+            if 356 < centroids[labels][0] < 365 :
+                if CounterFiveOne == 0:
+                    lists[i] = "5.1:Strongly Agree"
+                    i = i + 1
+                    CounterFiveOne = CounterFiveOne + 1
+            if 386 < centroids[labels][0] < 396:
+                if CounterFiveOne == 0:
+                    lists[i] = "5.1:Agree"
+                    i = i + 1
+                    CounterFiveOne = CounterFiveOne + 1
+                elif CounterFiveOne > 0:
+                    lists[i - 1] = "Incorrect Answer"
+            if 419 < centroids[labels][0] < 430:
+                if CounterFiveOne == 0:
+                    lists[i] = "5.1:Natural"
+                    i = i + 1
+                    CounterFiveOne = CounterFiveOne + 1
+                elif CounterFiveOne > 0:
+                    lists[i - 1] = "Incorrect Answer"
+            if 450 < centroids[labels][0] < 462:
+                if CounterFiveOne == 0:
+                    lists[i] = "5.1:DisAgree"
+                    i = i + 1
+                    CounterFiveOne = CounterFiveOne + 1
+                elif CounterFiveOne > 0:
+                    lists[i - 1] = "Incorrect Answer"
+            if 481 < centroids[labels][0] < 493:
+                if CounterFiveOne == 0:
+                    lists[i] = "5.1:Strongly DisAgree"
+                    i = i + 1
+                    CounterFiveOne = CounterFiveOne + 1
+                elif CounterFiveOne > 0:
+                    lists[i - 1] = "Incorrect Answer"
+        # -------------------------------------------------------------------------
+        if 651 < centroids[labels][1] < 660:
+            if CounterGender == 0:
+                i = i + 1
+            if CounterTerm == 0:
+                i = i + 1
+            if CounterMajor == 0:
+                i = i + 1
+            if CounterOneOne == 0:
+                i = i + 1
+            if CounterOneTwo == 0:
+                i = i + 1
+            if CounterOneThree == 0:
+                i = i + 1
+            if CounterOneFour == 0:
+                i = i + 1
+            if CounterOneFive == 0:
+                i = i + 1
+            if CounterTwoOne == 0:
+                i = i + 1
+            if CounterTwoTwo == 0:
+                i = i + 1
+            if CounterTwoThree == 0:
+                i = i + 1
+            if CounterTwoFour == 0:
+                i = i + 1
+            if CounterTwoFive == 0:
+                i = i + 1
+            if CounterTwoSix == 0:
+                i = i + 1
+            if CounterThreeOne == 0:
+                i = i + 1
+            if CounterThreeTwo == 0:
+                i = i + 1
+            if CounterThreeThree == 0:
+                i = i + 1
+            if CounterFourOne == 0:
+                i = i + 1
+            if CounterFourTwo == 0:
+                i = i + 1
+            if CounterFourThree == 0:
+                i = i + 1
+            if CounterFiveOne == 0:
+                i = i + 1
+            if 356 < centroids[labels][0] < 365:
+                if CounterFiveTwo == 0:
+                    lists[i] = "5.2:Strongly Agree"
+                    i = i + 1
+                    CounterFiveTwo = CounterFiveTwo + 1
+            if 386 < centroids[labels][0] < 396:
+                if CounterFiveTwo == 0:
+                    lists[i] = "5.2:Agree"
+                    i = i + 1
+                    CounterFiveTwo = CounterFiveTwo + 1
+                elif CounterFiveTwo > 0:
+                    lists[i - 1] = "Incorrect Answer"
+            if 419 < centroids[labels][0] < 430:
+                if CounterFiveTwo == 0:
+                    lists[i] = "5.2:Natural"
+                    i = i + 1
+                    CounterFiveTwo = CounterFiveTwo + 1
+                elif CounterFiveTwo > 0:
+                    lists[i - 1] = "Incorrect Answer"
+            if 450 < centroids[labels][0] < 462:
+                if CounterFiveTwo == 0:
+                    lists[i] = "5.2:DisAgree"
+                    i = i + 1
+                    CounterFiveTwo = CounterFiveTwo + 1
+                elif CounterFiveTwo > 0:
+                    lists[i - 1] = "Incorrect Answer"
+            if 481 < centroids[labels][0] < 493:
+                if CounterFiveTwo == 0:
+                    lists[i] = "5.2:Strongly DisAgree"
+                    i = i + 1
+                    CounterFiveTwo = CounterFiveTwo + 1
+                elif CounterFiveTwo > 0:
+                    lists[i - 1] = "Incorrect Answer"
+    f = open("demofile2.txt", "w")
+
+    for ss in range(0, i):
+        f.write(lists[ss] +'\n')
+    f.close()
+
+    # open and read the file after the appending:
+    f = open("demofile2.txt", "r")
+    print(f.read())
+# --------------------------------------------------------------------------
+img = cv2.resize(img, (0, 0), fx=0.4, fy=0.4)
+print("Angle is {}".format(median_angle))
+
+
+cv2.waitKey(0)
